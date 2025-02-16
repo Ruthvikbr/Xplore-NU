@@ -6,15 +6,15 @@ plugins {
 }
 
 android {
-    namespace = "com.nbapps.xplore_nu"
+    namespace = "com.mobile.xplore_nu"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.nbapps.xplore_nu"
+        applicationId = "com.mobile.xplore_nu"
         minSdk = 26
         targetSdk = 34
-        versionCode = 2
-        versionName = "1.0.1"
+        versionCode = 1
+        versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

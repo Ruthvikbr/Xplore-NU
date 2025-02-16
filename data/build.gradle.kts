@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.nbapps.data"
+    namespace = "com.mobile.data"
     compileSdk = 35
 
     defaultConfig {

@@ -63,3 +63,7 @@ jobs:
           track: internal
           whatsNewDirectory: whatsnew/
           status: draft
+        env:
+          DEBUG: true
+          ACTIONS_RUNNER_DEBUG: true
+          ACTIONS_STEP_DEBUG: true

@@ -79,4 +79,6 @@ dependencies {
     //mapbox
     implementation(libs.android)
     implementation(libs.maps.compose)
+
+    implementation("androidx.compose.ui:ui-text-google-fonts:1.7.7")
 }

@@ -1,4 +1,4 @@
-package com.mobile.xplore_nu.ui.screens
+package com.mobile.xplore_nu.ui.screens.auth
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -18,6 +18,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.mobile.xplore_nu.ui.components.AppNameHeader
 import com.mobile.xplore_nu.ui.components.HuskyLogoImage
 import com.mobile.xplore_nu.ui.components.OutlinedTextFieldComponent
@@ -25,7 +26,7 @@ import com.mobile.xplore_nu.ui.components.RedButton
 import com.mobile.xplore_nu.ui.theme.fontFamily
 
 @Composable
-fun LoginPage() {
+fun LoginPage(navController: NavController) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize()
@@ -85,15 +86,9 @@ fun LoginPage() {
                     .align(Alignment.CenterHorizontally)
                     .padding(0.dp)
                     .clickable {
-
+                        navController.navigate("register")
                     }
             )
         }
     }
-}
-
-@Preview
-@Composable
-fun Preview() {
-    LoginPage()
 }

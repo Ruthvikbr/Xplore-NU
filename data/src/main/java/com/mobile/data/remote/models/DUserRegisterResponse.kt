@@ -1,5 +1,5 @@
 package com.mobile.data.remote.models
 
-data class UserRegisterResponse(
+data class DUserRegisterResponse(
     val message: String
 )

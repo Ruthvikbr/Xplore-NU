@@ -1,9 +1,8 @@
 package com.mobile.domain.models
 
-data class User(
-    val id: String,
+data class UserRegisterBody (
     val firstName: String,
     val lastName: String,
     val email: String,
-    val role: String
+    val password: String
 )

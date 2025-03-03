@@ -1,6 +1,6 @@
-package com.mobile.domain.models
+package com.mobile.data.remote.models
 
-data class User(
+data class DUserResponse(
     val id: String,
     val firstName: String,
     val lastName: String,

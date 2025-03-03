@@ -43,8 +43,8 @@ fun LoginPage(navController: NavController) {
                 color = Color(0xFF000000)
             )
         )
-        OutlinedTextFieldComponent(label = "Email")
-        OutlinedTextFieldComponent(label = "Password")
+//        OutlinedTextFieldComponent(label = "Email")
+//        OutlinedTextFieldComponent(label = "Password")
         TextButton(onClick = { /*TODO*/ }) {
             Text(
                 text = "Forget Password ?",

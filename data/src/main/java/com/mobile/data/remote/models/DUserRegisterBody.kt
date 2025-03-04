@@ -1,6 +1,6 @@
 package com.mobile.data.remote.models
 
-data class UserRegisterBody(
+data class DUserRegisterBody(
     val firstName: String,
     val lastName: String,
     val email: String,

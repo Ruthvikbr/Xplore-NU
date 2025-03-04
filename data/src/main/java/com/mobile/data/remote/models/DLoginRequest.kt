@@ -1,6 +1,6 @@
 package com.mobile.data.remote.models
 
-data class LoginRequest(
+data class DLoginRequest(
     val email: String,
     val password: String
 )

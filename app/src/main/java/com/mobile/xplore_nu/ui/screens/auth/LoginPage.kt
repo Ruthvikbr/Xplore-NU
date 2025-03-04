@@ -4,18 +4,20 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -27,6 +29,11 @@ import com.mobile.xplore_nu.ui.theme.fontFamily
 
 @Composable
 fun LoginPage(navController: NavController) {
+    val email = remember { mutableStateOf("") }
+    val password = remember {
+        mutableStateOf("")
+    }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize()
@@ -43,8 +50,31 @@ fun LoginPage(navController: NavController) {
                 color = Color(0xFF000000)
             )
         )
-//        OutlinedTextFieldComponent(label = "Email")
-//        OutlinedTextFieldComponent(label = "Password")
+
+        OutlinedTextFieldComponent(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 24.dp, end = 24.dp, bottom = 12.dp),
+            label = "Email ID",
+            value = email.value,
+            onValueChange = { value ->
+                email.value = value
+            },
+            isError = false,
+            errorMessage = "Enter a valid email ID"
+        )
+        OutlinedTextFieldComponent(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 24.dp, end = 24.dp, bottom = 12.dp),
+            label = "Password",
+            value = password.value,
+            onValueChange = { value ->
+                password.value = value
+            },
+            isError = false,
+            errorMessage = "Enter a valid password"
+        )
         TextButton(onClick = { /*TODO*/ }) {
             Text(
                 text = "Forget Password ?",
@@ -59,9 +89,9 @@ fun LoginPage(navController: NavController) {
             )
         }
         RedButton(label = "Login") {
-            
+
         }
-        Column{
+        Column {
             Text(
                 text = "Don’t have an account?\n",
                 style = TextStyle(

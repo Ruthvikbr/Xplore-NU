@@ -3,6 +3,8 @@ package com.mobile.xplore_nu.ui.components
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,6 +25,10 @@ fun OutlinedTextFieldComponent(
     onValueChange: (String) -> Unit,
     errorMessage: String? = null,
     isError: Boolean = false,
+    singleLine: Boolean = true,
+    keyboardOptions: KeyboardOptions = KeyboardOptions(),
+    keyboardActions: KeyboardActions = KeyboardActions(),
+    visualTransformation: VisualTransformation = VisualTransformation.None
 ) {
 
     Column(modifier = modifier) {
@@ -31,7 +37,11 @@ fun OutlinedTextFieldComponent(
             onValueChange = onValueChange,
             label = { Text(label) },
             isError = isError,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = singleLine,
+            keyboardOptions = keyboardOptions,
+            keyboardActions = keyboardActions,
+            visualTransformation = visualTransformation
         )
         if (isError && errorMessage != null) {
             Text(

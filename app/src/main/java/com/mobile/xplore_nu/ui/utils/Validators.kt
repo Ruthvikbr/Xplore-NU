@@ -8,7 +8,7 @@ object Validators {
      * @return `true` if the email is valid, `false` otherwise.
      */
     fun String.isValidEmail(): Boolean {
-        val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex()
+        val emailRegex = Regex("[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}")
         return matches(emailRegex)
     }
 
@@ -40,8 +40,8 @@ object Validators {
      * @return `true` if the name contains only valid characters, `false` otherwise.
      */
     fun String.isValidFullName(): Boolean {
-        val nameRegex = "^[a-zA-Z]+(\\s[a-zA-Z]+)*$".toRegex()
-        return matches(nameRegex)
+        val nameRegex = Regex("^[a-zA-Z]+(\\s[a-zA-Z]+)*$")
+        return nameRegex.matches(this)
     }
 
 }

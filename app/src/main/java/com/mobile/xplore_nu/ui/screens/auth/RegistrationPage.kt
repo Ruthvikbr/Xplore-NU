@@ -1,5 +1,6 @@
 package com.mobile.xplore_nu.ui.screens.auth
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,18 +9,28 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mobile.xplore_nu.ui.components.AppNameHeader
@@ -40,6 +51,16 @@ fun RegistrationPage(
     onPasswordUpdated: (password: String) -> Unit,
     onConfirmPasswordUpdated: (confirmPassword: String) -> Unit,
     ) {
+
+    val focusRequester = remember {
+        FocusRequester()
+    }
+
+    val focusManager: FocusManager = LocalFocusManager.current
+
+    LaunchedEffect(true) {
+        focusRequester.requestFocus()
+    }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -77,12 +98,21 @@ fun RegistrationPage(
         OutlinedTextFieldComponent(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 12.dp),
+                .padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 12.dp)
+                .focusRequester(focusRequester),
             label = "Full Name",
             value = registerState.fullName,
             onValueChange = onFullNameUpdated,
-            isError = registerState.isFullNameValid,
-            errorMessage = "Enter a valid full name"
+            isError = registerState.fullName.isNotEmpty() && !registerState.isFullNameValid,
+            errorMessage = "Enter a valid full name",
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Next
+            ),
+            keyboardActions = KeyboardActions(
+                onNext = {
+                    focusManager.moveFocus(FocusDirection.Down)
+                }
+            )
         )
         OutlinedTextFieldComponent(
             modifier = Modifier
@@ -91,8 +121,16 @@ fun RegistrationPage(
             label = "Email ID",
             value = registerState.email,
             onValueChange = onEmailUpdated,
-            isError = registerState.isEmailValid,
-            errorMessage = "Enter a valid email ID"
+            isError = registerState.email.isNotEmpty() && !registerState.isEmailValid,
+            errorMessage = "Enter a valid email ID",
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Next
+            ),
+            keyboardActions = KeyboardActions(
+                onNext = {
+                    focusManager.moveFocus(FocusDirection.Down)
+                }
+            )
         )
         OutlinedTextFieldComponent(
             modifier = Modifier
@@ -101,8 +139,17 @@ fun RegistrationPage(
             label = "Password",
             value = registerState.password,
             onValueChange = onPasswordUpdated,
-            isError = registerState.isPasswordValid,
-            errorMessage = "Enter a valid password"
+            isError = registerState.password.isNotEmpty() && !registerState.isPasswordValid,
+            errorMessage = "Enter a valid password",
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Next
+            ),
+            keyboardActions = KeyboardActions(
+                onNext = {
+                    focusManager.moveFocus(FocusDirection.Down)
+                }
+            ),
+            visualTransformation = PasswordVisualTransformation()
         )
         OutlinedTextFieldComponent(
             modifier = Modifier
@@ -111,8 +158,17 @@ fun RegistrationPage(
             label = "Confirm Password",
             value = registerState.confirmPassword,
             onValueChange = onConfirmPasswordUpdated,
-            isError = registerState.isConfirmPasswordValid || !registerState.doPasswordsMatch,
-            errorMessage = "Enter a valid confirm password"
+            isError = !(registerState.isConfirmPasswordValid || registerState.doPasswordsMatch),
+            errorMessage = "Enter a valid confirm password",
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    focusManager.clearFocus()
+                }
+            ),
+            visualTransformation = PasswordVisualTransformation()
         )
         RedButton(
             label = "Register", modifier = Modifier

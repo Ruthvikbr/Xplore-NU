@@ -9,7 +9,7 @@ data class RegisterState(
     val isEmailValid: Boolean = false,
     val isPasswordValid: Boolean = false,
     val isConfirmPasswordValid: Boolean = false,
-    val doPasswordsMatch: Boolean = false,
+    val doPasswordsMatch: Boolean = true,
     val canRegister: Boolean = false,
     val isLoading: Boolean = false
 )

@@ -30,7 +30,9 @@ class AuthViewModel @Inject constructor(
     val registerState = _registerState.asStateFlow()
 
     init {
-        registerState.distinctUntilChangedBy { it.fullName }.map { it.fullName.isValidFullName() }
+        registerState.distinctUntilChangedBy { it.fullName }.map {
+            it.fullName.trim().isValidFullName()
+        }
             .onEach { isFullNameValid ->
                 _registerState.update {
                     it.copy(
@@ -39,7 +41,9 @@ class AuthViewModel @Inject constructor(
                 }
             }.launchIn(viewModelScope)
 
-        registerState.distinctUntilChangedBy { it.email }.map { it.email.isValidEmail() }
+        registerState.distinctUntilChangedBy { it.email }.map {
+            it.email.trim().isValidEmail()
+        }
             .onEach { isEmailValid ->
                 _registerState.update {
                     it.copy(
@@ -48,7 +52,9 @@ class AuthViewModel @Inject constructor(
                 }
             }.launchIn(viewModelScope)
 
-        registerState.distinctUntilChangedBy { it.password }.map { it.password.isValidPassword() }
+        registerState.distinctUntilChangedBy { it.password }.map {
+            it.password.isValidPassword()
+        }
             .onEach { isPasswordValid ->
                 _registerState.update {
                     it.copy(
@@ -86,7 +92,7 @@ class AuthViewModel @Inject constructor(
                             && state.isFullNameValid && !state.isLoading && state.doPasswordsMatch
                 )
             }
-        }
+        }.launchIn(viewModelScope)
     }
 
     fun updateEmail(email: String) {

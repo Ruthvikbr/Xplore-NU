@@ -1,10 +1,12 @@
 package com.mobile.data.local.repository
 
 import com.mobile.data.local.mappers.toDLoginRequest
+import com.mobile.data.local.mappers.toDUser
 import com.mobile.data.local.mappers.toDUserRegisterBody
 import com.mobile.data.local.mappers.toLoginResponse
 import com.mobile.data.local.mappers.toUser
 import com.mobile.data.local.mappers.toUserRegisterResponse
+import com.mobile.data.local.models.DUser
 import com.mobile.data.local.room.Dao
 import com.mobile.data.remote.UserService
 import com.mobile.domain.models.LoginRequest
@@ -20,7 +22,7 @@ class UserRepositoryImpl @Inject constructor(
     private val userService: UserService
 ) : UserRepository {
     override suspend fun insertUser(user: User) {
-        dao.insertUser(user)
+        dao.insertUser(user.toDUser())
     }
 
     override fun getUser(id: String): User? {

@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.nbapps.data"
+    namespace = "com.xplore_nu.data"
     compileSdk = 35
 
     defaultConfig {
@@ -44,12 +44,17 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
+    testImplementation(libs.androidx.room.testing)
+    implementation(libs.androidx.room.paging)
+
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
 
     implementation(libs.retrofit)
     implementation(libs.converter.gson) // If you are using Gson for JSON conversion
 
-    implementation("com.squareup.okhttp3:logging-interceptor:4.10.0")
+    implementation(libs.logging.interceptor)
 }

@@ -28,7 +28,7 @@ import com.mobile.xplore_nu.ui.components.RedButton
 import com.mobile.xplore_nu.ui.theme.fontFamily
 
 @Composable
-fun LoginPage(navController: NavController) {
+fun LoginPage(onRegisterButtonClicked : () -> Unit) {
     val email = remember { mutableStateOf("") }
     val password = remember {
         mutableStateOf("")
@@ -88,9 +88,7 @@ fun LoginPage(navController: NavController) {
                 )
             )
         }
-        RedButton(label = "Login") {
-
-        }
+        RedButton(label = "Login", onClick = {}, enabled = false)
         Column {
             Text(
                 text = "Don’t have an account?\n",
@@ -116,7 +114,7 @@ fun LoginPage(navController: NavController) {
                     .align(Alignment.CenterHorizontally)
                     .padding(0.dp)
                     .clickable {
-                        navController.navigate("register")
+                        onRegisterButtonClicked()
                     }
             )
         }

@@ -9,12 +9,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 
 @Composable
-fun RedButton(label: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
+fun RedButton(
+    label: String,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+    enabled: Boolean = true
+) {
     Button(
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
         shape = RoundedCornerShape(20),
-        modifier = modifier
+        modifier = modifier,
+        enabled = enabled
     ) {
         Text(text = label, color = Color.White)
     }

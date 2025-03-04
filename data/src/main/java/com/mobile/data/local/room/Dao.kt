@@ -10,7 +10,7 @@ import com.mobile.domain.models.User
 interface Dao {
 
     @Insert
-    suspend fun insertUser(user: User)
+    suspend fun insertUser(user: DUser)
 
     @Query("SELECT * FROM DUser WHERE id=:id")
     fun getUser(id: String): DUser?

@@ -28,14 +28,18 @@ import com.mobile.xplore_nu.ui.components.LeftChevron
 import com.mobile.xplore_nu.ui.components.OutlinedTextFieldComponent
 import com.mobile.xplore_nu.ui.components.RedButton
 import com.mobile.xplore_nu.ui.theme.fontFamily
+import com.mobile.xplore_nu.ui.uistates.RegisterState
 
 @Composable
-fun RegistrationPage() {
-
-    var fullName by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
+fun RegistrationPage(
+    registerState: RegisterState,
+    onBackButtonClicked: () -> Unit,
+    onRegisterButtonClicked: () -> Unit,
+    onFullNameUpdated: (fullName: String) -> Unit,
+    onEmailUpdated: (email: String) -> Unit,
+    onPasswordUpdated: (password: String) -> Unit,
+    onConfirmPasswordUpdated: (confirmPassword: String) -> Unit,
+    ) {
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -50,7 +54,7 @@ fun RegistrationPage() {
                 .padding(start = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            LeftChevron(onClick = {})
+            LeftChevron(onClick = onBackButtonClicked)
         }
         AppNameHeader()
         HuskyLogoImage()
@@ -75,11 +79,9 @@ fun RegistrationPage() {
                 .fillMaxWidth()
                 .padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 12.dp),
             label = "Full Name",
-            value = fullName,
-            onValueChange = { value ->
-                fullName = value
-            },
-            isError = false,
+            value = registerState.fullName,
+            onValueChange = onFullNameUpdated,
+            isError = registerState.isFullNameValid,
             errorMessage = "Enter a valid full name"
         )
         OutlinedTextFieldComponent(
@@ -87,11 +89,9 @@ fun RegistrationPage() {
                 .fillMaxWidth()
                 .padding(start = 24.dp, end = 24.dp, bottom = 12.dp),
             label = "Email ID",
-            value = email,
-            onValueChange = { value ->
-                email = value
-            },
-            isError = false,
+            value = registerState.email,
+            onValueChange = onEmailUpdated,
+            isError = registerState.isEmailValid,
             errorMessage = "Enter a valid email ID"
         )
         OutlinedTextFieldComponent(
@@ -99,11 +99,9 @@ fun RegistrationPage() {
                 .fillMaxWidth()
                 .padding(start = 24.dp, end = 24.dp, bottom = 12.dp),
             label = "Password",
-            value = password,
-            onValueChange = { value ->
-                password = value
-            },
-            isError = false,
+            value = registerState.password,
+            onValueChange = onPasswordUpdated,
+            isError = registerState.isPasswordValid,
             errorMessage = "Enter a valid password"
         )
         OutlinedTextFieldComponent(
@@ -111,20 +109,17 @@ fun RegistrationPage() {
                 .fillMaxWidth()
                 .padding(start = 24.dp, end = 24.dp, bottom = 32.dp),
             label = "Confirm Password",
-            value = confirmPassword,
-            onValueChange = { value ->
-                confirmPassword = value
-            },
-            isError = false,
+            value = registerState.confirmPassword,
+            onValueChange = onConfirmPasswordUpdated,
+            isError = registerState.isConfirmPasswordValid || !registerState.doPasswordsMatch,
             errorMessage = "Enter a valid confirm password"
         )
         RedButton(
             label = "Register", modifier = Modifier
                 .fillMaxWidth()
                 .height(54.dp)
-                .padding(start = 24.dp, end = 24.dp)
-        ) {
-
-        }
+                .padding(start = 24.dp, end = 24.dp), onClick = onRegisterButtonClicked,
+            enabled = registerState.canRegister
+        )
     }
 }

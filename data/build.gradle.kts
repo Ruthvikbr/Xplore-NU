@@ -2,10 +2,11 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
     id("com.google.devtools.ksp")
+    id("dagger.hilt.android.plugin")
 }
 
 android {
-    namespace = "com.nbapps.data"
+    namespace = "com.xplore_nu.data"
     compileSdk = 35
 
     defaultConfig {
@@ -43,10 +44,18 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
+    testImplementation(libs.androidx.room.testing)
+    implementation(libs.androidx.room.paging)
+
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
 
     implementation(libs.retrofit)
     implementation(libs.converter.gson) // If you are using Gson for JSON conversion
+
+    implementation(libs.logging.interceptor)
+    implementation(libs.androidx.datastore.preferences)
 }

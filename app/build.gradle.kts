@@ -3,14 +3,15 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.compose.compiler)
     id("com.google.devtools.ksp")
+    id("dagger.hilt.android.plugin")
 }
 
 android {
-    namespace = "com.nbapps.xplore_nu"
+    namespace = "com.mobile.xplore_nu"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.nbapps.xplore_nu"
+        applicationId = "com.mobile.xplore_nu"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
@@ -79,4 +80,13 @@ dependencies {
     //mapbox
     implementation(libs.android)
     implementation(libs.maps.compose)
+    
+    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.ui.text.google.fonts)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+
+    implementation(libs.androidx.core.splashscreen)
+
+
 }

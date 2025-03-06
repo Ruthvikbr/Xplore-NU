@@ -28,7 +28,8 @@ fun OutlinedTextFieldComponent(
     singleLine: Boolean = true,
     keyboardOptions: KeyboardOptions = KeyboardOptions(),
     keyboardActions: KeyboardActions = KeyboardActions(),
-    visualTransformation: VisualTransformation = VisualTransformation.None
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    enabled: Boolean = true
 ) {
 
     Column(modifier = modifier) {
@@ -41,7 +42,8 @@ fun OutlinedTextFieldComponent(
             singleLine = singleLine,
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
-            visualTransformation = visualTransformation
+            visualTransformation = visualTransformation,
+            enabled = enabled
         )
         if (isError && errorMessage != null) {
             Text(

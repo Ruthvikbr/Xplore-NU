@@ -39,7 +39,7 @@ object Validators {
      *
      * @return `true` if the name contains only valid characters, `false` otherwise.
      */
-    fun String.isValidFullName(): Boolean {
+    fun String.isValidName(): Boolean {
         val nameRegex = Regex("^[a-zA-Z]+(\\s[a-zA-Z]+)*$")
         return nameRegex.matches(this)
     }

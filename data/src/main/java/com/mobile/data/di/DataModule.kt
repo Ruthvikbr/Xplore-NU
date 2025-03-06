@@ -1,6 +1,9 @@
 package com.mobile.data.di
 
 import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
 import com.mobile.data.local.repository.UserRepositoryImpl
 import com.mobile.data.local.room.Dao
@@ -29,5 +32,20 @@ object DataModule {
 
     @Singleton
     @Provides
-    fun provideUserRepository(dao: Dao, userService: UserService): UserRepository = UserRepositoryImpl(dao, userService)
+    fun provideUserRepository(
+        dao: Dao,
+        userService: UserService,
+        dataStore: DataStore<Preferences>
+    ): UserRepository = UserRepositoryImpl(dao, userService, dataStore)
+
+    private const val USER_PREFERENCES_NAME = "user_preferences"
+
+    private val Context.dataStore by preferencesDataStore(
+        name = USER_PREFERENCES_NAME
+    )
+
+    @Provides
+    @Singleton
+    fun provideDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
+        context.dataStore
 }

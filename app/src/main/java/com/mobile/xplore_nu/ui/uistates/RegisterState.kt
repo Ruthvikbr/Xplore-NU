@@ -1,11 +1,13 @@
 package com.mobile.xplore_nu.ui.uistates
 
 data class RegisterState(
-    val fullName: String = "",
+    val firstName: String = "",
+    val lastName: String = "",
     val email: String = "",
     val password: String = "",
     val confirmPassword: String = "",
-    val isFullNameValid: Boolean = false,
+    val isFirstNameValid: Boolean = false,
+    val isLastNameValid: Boolean = false,
     val isEmailValid: Boolean = false,
     val isPasswordValid: Boolean = false,
     val isConfirmPasswordValid: Boolean = false,

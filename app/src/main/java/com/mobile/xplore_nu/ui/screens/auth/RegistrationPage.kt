@@ -1,6 +1,6 @@
 package com.mobile.xplore_nu.ui.screens.auth
 
-import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,10 +15,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
@@ -26,13 +23,18 @@ import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mobile.domain.models.UserRegisterResponse
+import com.mobile.domain.utils.Resource
+import com.mobile.domain.utils.Status
 import com.mobile.xplore_nu.ui.components.AppNameHeader
 import com.mobile.xplore_nu.ui.components.HuskyLogoImage
 import com.mobile.xplore_nu.ui.components.LeftChevron
@@ -45,21 +47,41 @@ import com.mobile.xplore_nu.ui.uistates.RegisterState
 fun RegistrationPage(
     registerState: RegisterState,
     onBackButtonClicked: () -> Unit,
-    onRegisterButtonClicked: () -> Unit,
-    onFullNameUpdated: (fullName: String) -> Unit,
+    onRegisterButtonClicked: (state: RegisterState) -> Unit,
+    onFirstNameUpdated: (firstName: String) -> Unit,
+    onLastNameUpdated: (lastName: String) -> Unit,
     onEmailUpdated: (email: String) -> Unit,
     onPasswordUpdated: (password: String) -> Unit,
     onConfirmPasswordUpdated: (confirmPassword: String) -> Unit,
-    ) {
+    registrationStatus: Resource<UserRegisterResponse>,
+    navigateToHomeScreen: () -> Unit,
+) {
 
     val focusRequester = remember {
         FocusRequester()
     }
 
+
     val focusManager: FocusManager = LocalFocusManager.current
 
     LaunchedEffect(true) {
         focusRequester.requestFocus()
+    }
+
+    val context = LocalContext.current
+
+    LaunchedEffect(registrationStatus) {
+        when (registrationStatus.status) {
+            Status.SUCCESS ->  {
+                navigateToHomeScreen()
+            }
+            Status.ERROR ->  {
+                Toast.makeText(context, registrationStatus.message, Toast.LENGTH_LONG).show()
+            }
+            Status.LOADING ->  {
+                // Idle state
+            }
+        }
     }
 
     Column(
@@ -100,11 +122,11 @@ fun RegistrationPage(
                 .fillMaxWidth()
                 .padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 12.dp)
                 .focusRequester(focusRequester),
-            label = "Full Name",
-            value = registerState.fullName,
-            onValueChange = onFullNameUpdated,
-            isError = registerState.fullName.isNotEmpty() && !registerState.isFullNameValid,
-            errorMessage = "Enter a valid full name",
+            label = "First Name",
+            value = registerState.firstName,
+            onValueChange = onFirstNameUpdated,
+            isError = registerState.firstName.isNotEmpty() && !registerState.isFirstNameValid,
+            errorMessage = "Enter a valid first name",
             keyboardOptions = KeyboardOptions(
                 imeAction = ImeAction.Next
             ),
@@ -112,7 +134,27 @@ fun RegistrationPage(
                 onNext = {
                     focusManager.moveFocus(FocusDirection.Down)
                 }
-            )
+            ),
+            enabled = !registerState.isLoading
+        )
+        OutlinedTextFieldComponent(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 12.dp),
+            label = "Last Name",
+            value = registerState.lastName,
+            onValueChange = onLastNameUpdated,
+            isError = registerState.lastName.isNotEmpty() && !registerState.isLastNameValid,
+            errorMessage = "Enter a valid last name",
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Next
+            ),
+            keyboardActions = KeyboardActions(
+                onNext = {
+                    focusManager.moveFocus(FocusDirection.Down)
+                }
+            ),
+            enabled = !registerState.isLoading
         )
         OutlinedTextFieldComponent(
             modifier = Modifier
@@ -124,13 +166,15 @@ fun RegistrationPage(
             isError = registerState.email.isNotEmpty() && !registerState.isEmailValid,
             errorMessage = "Enter a valid email ID",
             keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Next
+                imeAction = ImeAction.Next,
+                keyboardType = KeyboardType.Email
             ),
             keyboardActions = KeyboardActions(
                 onNext = {
                     focusManager.moveFocus(FocusDirection.Down)
                 }
-            )
+            ),
+            enabled = !registerState.isLoading
         )
         OutlinedTextFieldComponent(
             modifier = Modifier
@@ -149,7 +193,8 @@ fun RegistrationPage(
                     focusManager.moveFocus(FocusDirection.Down)
                 }
             ),
-            visualTransformation = PasswordVisualTransformation()
+            visualTransformation = PasswordVisualTransformation(),
+            enabled = !registerState.isLoading
         )
         OutlinedTextFieldComponent(
             modifier = Modifier
@@ -168,14 +213,18 @@ fun RegistrationPage(
                     focusManager.clearFocus()
                 }
             ),
-            visualTransformation = PasswordVisualTransformation()
+            visualTransformation = PasswordVisualTransformation(),
+            enabled = !registerState.isLoading
         )
         RedButton(
             label = "Register", modifier = Modifier
                 .fillMaxWidth()
                 .height(54.dp)
-                .padding(start = 24.dp, end = 24.dp), onClick = onRegisterButtonClicked,
-            enabled = registerState.canRegister
+                .padding(start = 24.dp, end = 24.dp), onClick = {
+                onRegisterButtonClicked(registerState)
+            },
+            enabled = registerState.canRegister,
+            isLoading = registerState.isLoading
         )
     }
 }

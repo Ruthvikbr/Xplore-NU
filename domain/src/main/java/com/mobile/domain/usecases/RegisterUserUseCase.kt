@@ -8,4 +8,6 @@ class RegisterUserUseCase @Inject constructor(
     private val repository: UserRepository
 ) {
     suspend operator fun invoke(userRegisterBody: UserRegisterBody) = repository.registerUser(userRegisterBody)
+
+    fun isLoggedIn() = repository.isLoggedIn
 }

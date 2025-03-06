@@ -57,4 +57,5 @@ dependencies {
     implementation(libs.converter.gson) // If you are using Gson for JSON conversion
 
     implementation(libs.logging.interceptor)
+    implementation(libs.androidx.datastore.preferences)
 }

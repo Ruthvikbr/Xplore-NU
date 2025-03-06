@@ -1,23 +1,33 @@
 package com.mobile.xplore_nu.ui.screens.auth
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mobile.domain.models.UserRegisterBody
+import com.mobile.domain.models.UserRegisterResponse
 import com.mobile.domain.usecases.LoginUserUseCase
 import com.mobile.domain.usecases.RegisterUserUseCase
+import com.mobile.domain.utils.Resource
 import com.mobile.xplore_nu.ui.uistates.RegisterState
 import com.mobile.xplore_nu.ui.utils.Validators.isValidEmail
-import com.mobile.xplore_nu.ui.utils.Validators.isValidFullName
+import com.mobile.xplore_nu.ui.utils.Validators.isValidName
 import com.mobile.xplore_nu.ui.utils.Validators.isValidPassword
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -29,14 +39,37 @@ class AuthViewModel @Inject constructor(
     private val _registerState = MutableStateFlow<RegisterState>(RegisterState())
     val registerState = _registerState.asStateFlow()
 
+    private val _registerStatus =
+        MutableStateFlow<Resource<UserRegisterResponse>>(Resource.loading(null))
+    val registerStatus = _registerStatus.asStateFlow()
+
+    val isLoggedIn: StateFlow<Boolean?> = registerUserUseCase.isLoggedIn()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = null,
+        )
+
     init {
-        registerState.distinctUntilChangedBy { it.fullName }.map {
-            it.fullName.trim().isValidFullName()
+
+        registerState.distinctUntilChangedBy { it.firstName }.map {
+            it.firstName.trim().isValidName()
         }
-            .onEach { isFullNameValid ->
+            .onEach { isFirstNameValid ->
                 _registerState.update {
                     it.copy(
-                        isFullNameValid = isFullNameValid
+                        isFirstNameValid = isFirstNameValid
+                    )
+                }
+            }.launchIn(viewModelScope)
+
+        registerState.distinctUntilChangedBy { it.lastName }.map {
+            it.lastName.trim().isValidName()
+        }
+            .onEach { isLastNameValid ->
+                _registerState.update {
+                    it.copy(
+                        isLastNameValid = isLastNameValid
                     )
                 }
             }.launchIn(viewModelScope)
@@ -89,7 +122,7 @@ class AuthViewModel @Inject constructor(
             _registerState.update {
                 it.copy(
                     canRegister = state.isEmailValid && state.isPasswordValid && state.isConfirmPasswordValid
-                            && state.isFullNameValid && !state.isLoading && state.doPasswordsMatch
+                            && state.isFirstNameValid && state.isLastNameValid && !state.isLoading && state.doPasswordsMatch
                 )
             }
         }.launchIn(viewModelScope)
@@ -103,10 +136,18 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun updateFullName(fullName: String) {
+    fun updateFirstName(firstName: String) {
         _registerState.update {
             it.copy(
-                fullName = fullName
+                firstName = firstName
+            )
+        }
+    }
+
+    fun updateLastName(lastName: String) {
+        _registerState.update {
+            it.copy(
+                lastName = lastName
             )
         }
     }
@@ -127,7 +168,28 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun registerUser() {
+    fun registerUser(state: RegisterState) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _registerState.update {
+                it.copy(
+                    isLoading = true
+                )
+            }
 
+            val response: Resource<UserRegisterResponse> = registerUserUseCase.invoke(
+                UserRegisterBody(
+                    state.firstName,
+                    state.lastName,
+                    state.email,
+                    state.password
+                )
+            )
+            _registerStatus.emit(response)
+            _registerState.update {
+                it.copy(
+                    isLoading = false
+                )
+            }
+        }
     }
 }

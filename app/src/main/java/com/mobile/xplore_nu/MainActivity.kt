@@ -1,15 +1,21 @@
 package com.mobile.xplore_nu
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -17,38 +23,79 @@ import androidx.navigation.navigation
 import com.mobile.xplore_nu.ui.screens.auth.AuthViewModel
 import com.mobile.xplore_nu.ui.screens.auth.LoginPage
 import com.mobile.xplore_nu.ui.screens.auth.RegistrationPage
+import com.mobile.xplore_nu.ui.screens.tour.TourPage
 import com.mobile.xplore_nu.ui.theme.XploreNUTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private val authViewModel: AuthViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val splashScreen = installSplashScreen()
+
         setContent {
             XploreNUTheme {
                 val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = "auth") {
-                    navigation(startDestination = "register", route = "auth") {
-                        composable("login") {
-                            val viewModel = it.sharedViewModel<AuthViewModel>(navController)
-                            LoginPage(onRegisterButtonClicked = { navController.navigate("register") })
-                        }
-                        composable("register") {
-                            val viewModel = it.sharedViewModel<AuthViewModel>(navController)
-                            val state = viewModel.registerState.collectAsState()
-                            RegistrationPage(
-                                state.value,
-                                onBackButtonClicked = navController::popBackStack,
-                                onRegisterButtonClicked = viewModel::registerUser,
-                                onFullNameUpdated = viewModel::updateFullName,
-                                onEmailUpdated = viewModel::updateEmail,
-                                onPasswordUpdated = viewModel::updatePassword,
-                                onConfirmPasswordUpdated = viewModel::updateConfirmPassword,
-                            )
+                val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
+
+                splashScreen.setKeepOnScreenCondition { isLoggedIn == null }
+
+                LaunchedEffect(isLoggedIn) {
+                    isLoggedIn?.let { loggedIn ->
+                        val destination = if (loggedIn) "home" else "auth"
+                        navController.navigate(destination) {
+                            popUpTo(if (loggedIn) "auth" else "home") { inclusive = true }
                         }
                     }
                 }
+
+                NavHost(
+                    navController = navController,
+                    startDestination = isLoggedIn?.let { if (it) "home" else "auth" } ?: "splash" // Placeholder, handled by LaunchedEffect
+                ) {
+                    composable("splash") {  }
+                    authNavigation(navController, authViewModel)
+                    homeNavigation(navController)
+                }
             }
+        }
+    }
+}
+
+private fun NavGraphBuilder.authNavigation(navController: NavController, viewModel: AuthViewModel) {
+    navigation(startDestination = "login", route = "auth") {
+        composable("login") {
+            LoginPage(onRegisterButtonClicked = { navController.navigate("register") })
+        }
+        composable("register") {
+            val state by viewModel.registerState.collectAsState()
+            val registrationStatus by viewModel.registerStatus.collectAsState()
+            RegistrationPage(
+                state,
+                onBackButtonClicked = navController::popBackStack,
+                onRegisterButtonClicked = viewModel::registerUser,
+                onFirstNameUpdated = viewModel::updateFirstName,
+                onLastNameUpdated = viewModel::updateLastName,
+                onEmailUpdated = viewModel::updateEmail,
+                onPasswordUpdated = viewModel::updatePassword,
+                onConfirmPasswordUpdated = viewModel::updateConfirmPassword,
+                registrationStatus,
+                navigateToHomeScreen = {
+                    navController.navigate("home") {
+                        popUpTo("auth") { inclusive = true }
+                    }
+                }
+            )
+        }
+    }
+}
+
+private fun NavGraphBuilder.homeNavigation(navController: NavController) {
+    navigation(startDestination = "tour", route = "home") {
+        composable("tour") {
+            TourPage()
         }
     }
 }
@@ -60,5 +107,4 @@ inline fun <reified T : ViewModel> NavBackStackEntry.sharedViewModel(navControll
         navController.getBackStackEntry(navGraphRoute)
     }
     return hiltViewModel(parentEntry)
-
 }

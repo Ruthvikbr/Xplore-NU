@@ -22,6 +22,7 @@ import androidx.navigation.navigation
 import com.mobile.xplore_nu.ui.screens.auth.AuthViewModel
 import com.mobile.xplore_nu.ui.screens.auth.ForgotPasswordPage
 import com.mobile.xplore_nu.ui.screens.auth.LoginPage
+import com.mobile.xplore_nu.ui.screens.auth.OtpVerificationPage
 import com.mobile.xplore_nu.ui.screens.auth.RegistrationPage
 import com.mobile.xplore_nu.ui.screens.tour.TourPage
 import com.mobile.xplore_nu.ui.theme.XploreNUTheme
@@ -105,7 +106,11 @@ private fun NavGraphBuilder.authNavigation(navController: NavController, viewMod
             )
         }
         composable("otp_verification") {
-
+            OtpVerificationPage(
+                onBackButtonClicked = navController::popBackStack,
+                onVerifyOtpButtonClicked = {
+                    navController.navigate("password_reset")
+                })
         }
 
         composable("password_reset") {

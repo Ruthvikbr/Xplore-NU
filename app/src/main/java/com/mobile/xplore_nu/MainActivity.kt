@@ -25,6 +25,7 @@ import com.mobile.xplore_nu.ui.screens.auth.LoginPage
 import com.mobile.xplore_nu.ui.screens.auth.OtpVerificationPage
 import com.mobile.xplore_nu.ui.screens.auth.PasswordResetPage
 import com.mobile.xplore_nu.ui.screens.auth.RegistrationPage
+import com.mobile.xplore_nu.ui.screens.auth.ResetPasswordConfirmationPage
 import com.mobile.xplore_nu.ui.screens.tour.TourPage
 import com.mobile.xplore_nu.ui.theme.XploreNUTheme
 import com.mobile.xplore_nu.ui.uistates.ResetPasswordState
@@ -124,7 +125,15 @@ private fun NavGraphBuilder.authNavigation(navController: NavController, viewMod
                 })
         }
         composable("reset_confirmation") {
-
+            ResetPasswordConfirmationPage(onBackToLoginButtonClicked = {
+                navController.navigate("login") {
+                    popUpTo("auth") { inclusive = true }
+                }
+            }, onBackButtonClicked = {
+                navController.navigate("login") {
+                    popUpTo("auth") { inclusive = true }
+                }
+            })
         }
     }
 }

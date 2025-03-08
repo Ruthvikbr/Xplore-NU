@@ -12,6 +12,7 @@ import com.mobile.data.local.mappers.toDUserRegisterBody
 import com.mobile.data.local.mappers.toLoginResponse
 import com.mobile.data.local.mappers.toUser
 import com.mobile.data.local.mappers.toUserRegisterResponse
+import com.mobile.data.local.models.DUser
 import com.mobile.data.local.room.Dao
 import com.mobile.data.remote.UserService
 import com.mobile.domain.models.LoginRequest
@@ -51,6 +52,9 @@ class UserRepositoryImpl @Inject constructor(
                 saveAuthToken(data.token)
                 setIsLoggedIn(true)
 
+                val user = DUser(data.user.id, data.user.firstName, data.user.lastName, data.user.email, data.user.role)
+                insertUser(user.toUser())
+
                 Resource.success(data = data)
             } else {
                 Log.v("FAILURE", response.body().toString())
@@ -71,6 +75,9 @@ class UserRepositoryImpl @Inject constructor(
 
                 saveAuthToken(data.token)
                 setIsLoggedIn(true)
+
+                val user = DUser(data.user.id, data.user.firstName, data.user.lastName, data.user.email, data.user.role)
+                insertUser(user.toUser())
 
                 Resource.success(data = data)
             } else {

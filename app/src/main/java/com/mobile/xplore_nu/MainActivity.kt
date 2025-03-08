@@ -23,9 +23,11 @@ import com.mobile.xplore_nu.ui.screens.auth.AuthViewModel
 import com.mobile.xplore_nu.ui.screens.auth.ForgotPasswordPage
 import com.mobile.xplore_nu.ui.screens.auth.LoginPage
 import com.mobile.xplore_nu.ui.screens.auth.OtpVerificationPage
+import com.mobile.xplore_nu.ui.screens.auth.PasswordResetPage
 import com.mobile.xplore_nu.ui.screens.auth.RegistrationPage
 import com.mobile.xplore_nu.ui.screens.tour.TourPage
 import com.mobile.xplore_nu.ui.theme.XploreNUTheme
+import com.mobile.xplore_nu.ui.uistates.ResetPasswordState
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -114,7 +116,12 @@ private fun NavGraphBuilder.authNavigation(navController: NavController, viewMod
         }
 
         composable("password_reset") {
-
+            PasswordResetPage(
+                resetPasswordState = ResetPasswordState(),
+                onBackButtonClicked = navController::popBackStack,
+                onResetButtonClicked = {
+                    navController.navigate("reset_confirmation")
+                })
         }
         composable("reset_confirmation") {
 

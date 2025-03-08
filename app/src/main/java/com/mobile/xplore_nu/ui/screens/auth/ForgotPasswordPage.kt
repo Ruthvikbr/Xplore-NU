@@ -105,7 +105,7 @@ fun ForgotPasswordPage(
         )
         Spacer(modifier = Modifier.height(24.dp))
         RedButton(
-            label = "Register", modifier = Modifier
+            label = "Get OTP", modifier = Modifier
                 .fillMaxWidth()
                 .height(54.dp)
                 .padding(start = 24.dp, end = 24.dp),

@@ -28,7 +28,7 @@ import com.mobile.xplore_nu.ui.components.RedButton
 import com.mobile.xplore_nu.ui.theme.fontFamily
 
 @Composable
-fun LoginPage(onRegisterButtonClicked : () -> Unit) {
+fun LoginPage(onRegisterButtonClicked : () -> Unit, onForgotPasswordClicked: () -> Unit) {
     val email = remember { mutableStateOf("") }
     val password = remember {
         mutableStateOf("")
@@ -75,7 +75,7 @@ fun LoginPage(onRegisterButtonClicked : () -> Unit) {
             isError = false,
             errorMessage = "Enter a valid password"
         )
-        TextButton(onClick = { /*TODO*/ }) {
+        TextButton(onClick = onForgotPasswordClicked) {
             Text(
                 text = "Forget Password ?",
                 style = TextStyle(

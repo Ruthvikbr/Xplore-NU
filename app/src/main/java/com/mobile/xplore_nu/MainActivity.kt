@@ -1,7 +1,6 @@
 package com.mobile.xplore_nu
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -21,6 +20,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
 import com.mobile.xplore_nu.ui.screens.auth.AuthViewModel
+import com.mobile.xplore_nu.ui.screens.auth.ForgotPasswordPage
 import com.mobile.xplore_nu.ui.screens.auth.LoginPage
 import com.mobile.xplore_nu.ui.screens.auth.RegistrationPage
 import com.mobile.xplore_nu.ui.screens.tour.TourPage
@@ -53,9 +53,10 @@ class MainActivity : ComponentActivity() {
 
                 NavHost(
                     navController = navController,
-                    startDestination = isLoggedIn?.let { if (it) "home" else "auth" } ?: "splash" // Placeholder, handled by LaunchedEffect
+                    startDestination = isLoggedIn?.let { if (it) "home" else "auth" }
+                        ?: "splash" // Placeholder, handled by LaunchedEffect
                 ) {
-                    composable("splash") {  }
+                    composable("splash") { }
                     authNavigation(navController, authViewModel)
                     homeNavigation(navController)
                 }
@@ -67,7 +68,10 @@ class MainActivity : ComponentActivity() {
 private fun NavGraphBuilder.authNavigation(navController: NavController, viewModel: AuthViewModel) {
     navigation(startDestination = "login", route = "auth") {
         composable("login") {
-            LoginPage(onRegisterButtonClicked = { navController.navigate("register") })
+            LoginPage(
+                onRegisterButtonClicked = { navController.navigate("register") },
+                onForgotPasswordClicked = { navController.navigate("forgot_password") },
+            )
         }
         composable("register") {
             val state by viewModel.registerState.collectAsState()
@@ -88,6 +92,27 @@ private fun NavGraphBuilder.authNavigation(navController: NavController, viewMod
                     }
                 }
             )
+        }
+        composable("forgot_password") {
+            val state by viewModel.forgotPasswordState.collectAsState()
+            ForgotPasswordPage(
+                forgotPasswordState = state,
+                onBackButtonClicked = navController::popBackStack,
+                onEmailUpdated = viewModel::forgotPasswordEmailUpdated,
+                onRequestOtpClicked = {
+                    navController.navigate("otp_verification")
+                }
+            )
+        }
+        composable("otp_verification") {
+
+        }
+
+        composable("password_reset") {
+
+        }
+        composable("reset_confirmation") {
+
         }
     }
 }

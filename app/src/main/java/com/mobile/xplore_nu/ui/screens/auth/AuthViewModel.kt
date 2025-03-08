@@ -1,6 +1,5 @@
 package com.mobile.xplore_nu.ui.screens.auth
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobile.domain.models.UserRegisterBody
@@ -8,6 +7,7 @@ import com.mobile.domain.models.UserRegisterResponse
 import com.mobile.domain.usecases.LoginUserUseCase
 import com.mobile.domain.usecases.RegisterUserUseCase
 import com.mobile.domain.utils.Resource
+import com.mobile.xplore_nu.ui.uistates.ForgotPasswordState
 import com.mobile.xplore_nu.ui.uistates.RegisterState
 import com.mobile.xplore_nu.ui.utils.Validators.isValidEmail
 import com.mobile.xplore_nu.ui.utils.Validators.isValidName
@@ -18,7 +18,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
@@ -49,6 +48,13 @@ class AuthViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = null,
         )
+
+    private val _forgotPasswordState = MutableStateFlow<ForgotPasswordState>(ForgotPasswordState())
+    val forgotPasswordState = _forgotPasswordState.asStateFlow()
+
+    private val _requestOtpStatus =
+        MutableStateFlow<Resource<UserRegisterResponse>>(Resource.loading(null))
+    val requestOtpStatus = _requestOtpStatus.asStateFlow()
 
     init {
 
@@ -126,6 +132,8 @@ class AuthViewModel @Inject constructor(
                 )
             }
         }.launchIn(viewModelScope)
+
+
     }
 
     fun updateEmail(email: String) {
@@ -186,6 +194,30 @@ class AuthViewModel @Inject constructor(
             )
             _registerStatus.emit(response)
             _registerState.update {
+                it.copy(
+                    isLoading = false
+                )
+            }
+        }
+    }
+
+    fun forgotPasswordEmailUpdated(email: String) {
+        _forgotPasswordState.update {
+            it.copy(
+                email = email
+            )
+        }
+    }
+
+    fun requestOtp(forgotPasswordState: ForgotPasswordState) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _forgotPasswordState.update {
+                it.copy(
+                    isLoading = true
+                )
+            }
+
+            _forgotPasswordState.update {
                 it.copy(
                     isLoading = false
                 )

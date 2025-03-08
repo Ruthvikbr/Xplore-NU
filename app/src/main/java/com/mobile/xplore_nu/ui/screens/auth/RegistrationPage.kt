@@ -226,5 +226,6 @@ fun RegistrationPage(
             enabled = registerState.canRegister,
             isLoading = registerState.isLoading
         )
+        Spacer(modifier = Modifier.height(100.dp))
     }
 }

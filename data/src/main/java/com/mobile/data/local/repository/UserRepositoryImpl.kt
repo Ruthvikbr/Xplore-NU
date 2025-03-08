@@ -1,5 +1,6 @@
 package com.mobile.data.local.repository
 
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -41,15 +42,31 @@ class UserRepositoryImpl @Inject constructor(
         return dao.getUser(id)?.toUser()
     }
 
-    override suspend fun loginUser(loginRequest: LoginRequest): LoginResponse {
-        val response = userService.loginUser(loginRequest.toDLoginRequest())
-        return response.body()?.toLoginResponse() ?: throw Exception("Login failed")
+    override suspend fun loginUser(loginRequest: LoginRequest): Resource<LoginResponse> {
+        try {
+            val response = userService.loginUser(loginRequest.toDLoginRequest())
+            return if (response.isSuccessful && response.body()!=null) {
+                Log.v("SUCCESS", response.body().toString())
+                val data: LoginResponse = response.body()!!.toLoginResponse()
+                saveAuthToken(data.token)
+                setIsLoggedIn(true)
+
+                Resource.success(data = data)
+            } else {
+                Log.v("FAILURE", response.body().toString())
+                Resource.error(response.body()?.message ?: "Something went wrong", null)
+            }
+        } catch (e: Exception) {
+            Log.v("EXCEPTION", e.message.toString())
+            return Resource.error("Something went wrong", null)
+        }
     }
 
     override suspend fun registerUser(userRegisterBody: UserRegisterBody): Resource<UserRegisterResponse> {
         try {
             val response = userService.registerUser(userRegisterBody.toDUserRegisterBody())
             return if (response.isSuccessful && response.body() != null) {
+                Log.v("SUCCESS", response.body().toString())
                 val data: UserRegisterResponse = response.body()!!.toUserRegisterResponse()
 
                 saveAuthToken(data.token)
@@ -57,10 +74,12 @@ class UserRepositoryImpl @Inject constructor(
 
                 Resource.success(data = data)
             } else {
+                Log.v("FAILURE", response.body().toString())
                 Resource.error(response.body()?.message ?: "Something went wrong", null)
             }
         } catch (e: Exception) {
-           return Resource.error("Something went Wrong", null)
+            Log.v("EXCEPTION", e.message.toString())
+           return Resource.error("Something went Wrong"+e.message, null)
         }
     }
 

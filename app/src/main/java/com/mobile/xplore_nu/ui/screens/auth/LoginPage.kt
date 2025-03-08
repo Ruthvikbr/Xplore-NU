@@ -1,5 +1,6 @@
 package com.mobile.xplore_nu.ui.screens.auth
 
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -7,31 +8,80 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.mobile.domain.models.LoginResponse
+import com.mobile.domain.models.UserRegisterResponse
+import com.mobile.domain.utils.Resource
+import com.mobile.domain.utils.Status
 import com.mobile.xplore_nu.ui.components.AppNameHeader
 import com.mobile.xplore_nu.ui.components.HuskyLogoImage
 import com.mobile.xplore_nu.ui.components.OutlinedTextFieldComponent
 import com.mobile.xplore_nu.ui.components.RedButton
 import com.mobile.xplore_nu.ui.theme.fontFamily
+import com.mobile.xplore_nu.ui.uistates.LoginState
+import com.mobile.xplore_nu.ui.uistates.RegisterState
+import com.mobile.xplore_nu.ui.utils.Validators.isValidEmail
 
 @Composable
-fun LoginPage(onRegisterButtonClicked : () -> Unit) {
-    val email = remember { mutableStateOf("") }
-    val password = remember {
-        mutableStateOf("")
+fun LoginPage(
+    onRegisterButtonClicked : () -> Unit,
+    loginState: LoginState,
+    onBackButtonClicked: () -> Unit,
+    onEmailUpdated: (email: String) -> Unit,
+    onPasswordUpdated: (password: String) -> Unit,
+    loginStatus: Resource<LoginResponse>,
+    onLoginButtonClicked: (state: LoginState) -> Unit,
+    navigateToHomeScreen: () -> Unit,
+    onForgotPasswordButtonClicked: () -> Unit
+) {
+    val focusRequester = remember {
+        FocusRequester()
+    }
+
+    val focusManager: FocusManager = LocalFocusManager.current
+
+    LaunchedEffect(true) {
+        focusRequester.requestFocus()
+    }
+
+    val context = LocalContext.current
+
+    LaunchedEffect(loginStatus) {
+        when (loginStatus.status) {
+            Status.SUCCESS ->  {
+                navigateToHomeScreen()
+            }
+            Status.ERROR ->  {
+                Toast.makeText(context, loginStatus.message, Toast.LENGTH_LONG).show()
+            }
+            Status.LOADING ->  {
+                // Idle state
+            }
+        }
     }
 
     Column(
@@ -54,28 +104,44 @@ fun LoginPage(onRegisterButtonClicked : () -> Unit) {
         OutlinedTextFieldComponent(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 24.dp, end = 24.dp, bottom = 12.dp),
+                .padding(start = 24.dp, end = 24.dp, bottom = 12.dp)
+                .focusRequester(focusRequester),
             label = "Email ID",
-            value = email.value,
-            onValueChange = { value ->
-                email.value = value
-            },
-            isError = false,
-            errorMessage = "Enter a valid email ID"
+            value = loginState.email,
+            onValueChange = onEmailUpdated,
+            isError = loginState.email.isNotEmpty() && !loginState.isEmailValid,
+            errorMessage = "Enter a valid email ID",
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Next
+            ),
+            keyboardActions = KeyboardActions(
+                onNext = {
+                    focusManager.moveFocus(FocusDirection.Down)
+                }
+            ),
+            enabled = !loginState.isLoading
         )
         OutlinedTextFieldComponent(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 24.dp, end = 24.dp, bottom = 12.dp),
             label = "Password",
-            value = password.value,
-            onValueChange = { value ->
-                password.value = value
-            },
-            isError = false,
-            errorMessage = "Enter a valid password"
+            value = loginState.password,
+            onValueChange = onPasswordUpdated,
+            isError = loginState.password.isNotEmpty() && !loginState.isPasswordValid,
+            errorMessage = "Enter a valid password",
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    focusManager.clearFocus()
+                }
+            ),
+            visualTransformation = PasswordVisualTransformation(),
+            enabled = !loginState.isLoading
         )
-        TextButton(onClick = { /*TODO*/ }) {
+        TextButton(onClick = onForgotPasswordButtonClicked) {
             Text(
                 text = "Forget Password ?",
                 style = TextStyle(
@@ -88,7 +154,12 @@ fun LoginPage(onRegisterButtonClicked : () -> Unit) {
                 )
             )
         }
-        RedButton(label = "Login", onClick = {}, enabled = false)
+        RedButton(
+            label = "Login",
+            onClick = {onLoginButtonClicked(loginState)},
+            enabled = loginState.canLogin,
+            isLoading = loginState.isLoading
+        )
         Column {
             Text(
                 text = "Don’t have an account?\n",

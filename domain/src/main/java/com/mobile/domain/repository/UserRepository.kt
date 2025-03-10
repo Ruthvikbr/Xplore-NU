@@ -14,7 +14,7 @@ interface UserRepository {
 
     fun getUser(id: String): User?
 
-    suspend fun loginUser(loginRequest: LoginRequest): LoginResponse
+    suspend fun loginUser(loginRequest: LoginRequest): Resource<LoginResponse>
 
     suspend fun registerUser(userRegisterBody: UserRegisterBody): Resource<UserRegisterResponse>
 

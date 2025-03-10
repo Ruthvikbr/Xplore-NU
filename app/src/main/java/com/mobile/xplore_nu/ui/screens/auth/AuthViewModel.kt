@@ -3,11 +3,14 @@ package com.mobile.xplore_nu.ui.screens.auth
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mobile.domain.models.LoginRequest
+import com.mobile.domain.models.LoginResponse
 import com.mobile.domain.models.UserRegisterBody
 import com.mobile.domain.models.UserRegisterResponse
 import com.mobile.domain.usecases.LoginUserUseCase
 import com.mobile.domain.usecases.RegisterUserUseCase
 import com.mobile.domain.utils.Resource
+import com.mobile.xplore_nu.ui.uistates.LoginState
 import com.mobile.xplore_nu.ui.uistates.RegisterState
 import com.mobile.xplore_nu.ui.utils.Validators.isValidEmail
 import com.mobile.xplore_nu.ui.utils.Validators.isValidName
@@ -39,9 +42,15 @@ class AuthViewModel @Inject constructor(
     private val _registerState = MutableStateFlow<RegisterState>(RegisterState())
     val registerState = _registerState.asStateFlow()
 
+    private val _loginState = MutableStateFlow(LoginState())
+    val loginState = _loginState.asStateFlow()
+
     private val _registerStatus =
         MutableStateFlow<Resource<UserRegisterResponse>>(Resource.loading(null))
     val registerStatus = _registerStatus.asStateFlow()
+
+    private val _loginStatus = MutableStateFlow<Resource<LoginResponse>>(Resource.loading(null))
+    val loginStatus = _loginStatus.asStateFlow()
 
     val isLoggedIn: StateFlow<Boolean?> = registerUserUseCase.isLoggedIn()
         .stateIn(
@@ -126,6 +135,36 @@ class AuthViewModel @Inject constructor(
                 )
             }
         }.launchIn(viewModelScope)
+
+        loginState.onEach { state ->
+            _loginState.update {
+                it.copy(
+                    canLogin = state.isEmailValid && state.isPasswordValid && !state.isLoading
+                )
+            }
+        }.launchIn(viewModelScope)
+
+        loginState.distinctUntilChangedBy { it.email }.map {
+            it.email.trim().isValidEmail()
+        }
+            .onEach { isValidEmail ->
+                _loginState.update {
+                    it.copy(
+                        isEmailValid = isValidEmail
+                    )
+                }
+            }.launchIn(viewModelScope)
+
+        loginState.distinctUntilChangedBy { it.password }.map {
+            it.password.trim().isValidPassword()
+        }
+            .onEach { isValidPassword ->
+                _loginState.update {
+                    it.copy(
+                        isPasswordValid = isValidPassword
+                    )
+                }
+            }.launchIn(viewModelScope)
     }
 
     fun updateEmail(email: String) {
@@ -186,6 +225,45 @@ class AuthViewModel @Inject constructor(
             )
             _registerStatus.emit(response)
             _registerState.update {
+                it.copy(
+                    isLoading = false
+                )
+            }
+        }
+    }
+
+    fun updateEmailForLogin(email: String) {
+        _loginState.update {
+            it.copy(
+                email = email
+            )
+        }
+    }
+
+    fun updatePasswordForLogin(password: String) {
+        _loginState.update {
+            it.copy(
+                password = password
+            )
+        }
+    }
+
+    fun loginUser(state: LoginState) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _loginState.update {
+                it.copy(
+                    isLoading = true
+                )
+            }
+
+            val response: Resource<LoginResponse> = loginUserUseCase.invoke(
+                LoginRequest(
+                    state.email,
+                    state.password
+                )
+            )
+            _loginStatus.emit(response)
+            _loginState.update {
                 it.copy(
                     isLoading = false
                 )

@@ -74,9 +74,24 @@ class MainActivity : ComponentActivity() {
 private fun NavGraphBuilder.authNavigation(navController: NavController, viewModel: AuthViewModel) {
     navigation(startDestination = "login", route = "auth") {
         composable("login") {
+            val state by viewModel.loginState.collectAsState()
+            val loginStatus by viewModel.loginStatus.collectAsState()
             LoginPage(
                 onRegisterButtonClicked = { navController.navigate("register") },
-                onForgotPasswordClicked = { navController.navigate("forgot_password") },
+                loginState = state,
+                onBackButtonClicked = navController::popBackStack,
+                onEmailUpdated = viewModel::updateEmailForLogin,
+                onPasswordUpdated = viewModel::updatePasswordForLogin,
+                loginStatus = loginStatus,
+                onLoginButtonClicked = viewModel::loginUser,
+                navigateToHomeScreen = {
+                    navController.navigate("home") {
+                        popUpTo("auth") { inclusive = true }
+                    }
+                },
+                onForgotPasswordButtonClicked = {
+                    navController.navigate("forgot_password")
+                }
             )
         }
         composable("register") {

@@ -1,9 +1,9 @@
 package com.mobile.domain.repository
 
-import com.mobile.domain.models.RequestOtpRequest
-import com.mobile.domain.models.RequestOtpResponse
 import com.mobile.domain.models.LoginRequest
 import com.mobile.domain.models.LoginResponse
+import com.mobile.domain.models.RequestOtpRequest
+import com.mobile.domain.models.RequestOtpResponse
 import com.mobile.domain.models.ResendOtpRequest
 import com.mobile.domain.models.ResendOtpResponse
 import com.mobile.domain.models.ResetPasswordRequest
@@ -22,7 +22,7 @@ interface UserRepository {
 
     fun getUser(id: String): User?
 
-    suspend fun loginUser(loginRequest: LoginRequest): LoginResponse
+    suspend fun loginUser(loginRequest: LoginRequest): Resource<LoginResponse>
 
     suspend fun registerUser(userRegisterBody: UserRegisterBody): Resource<UserRegisterResponse>
 

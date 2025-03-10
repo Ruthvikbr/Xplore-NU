@@ -1,5 +1,6 @@
 package com.mobile.data.local.repository
 
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -19,6 +20,7 @@ import com.mobile.data.local.mappers.toResetPasswordResponse
 import com.mobile.data.local.mappers.toUser
 import com.mobile.data.local.mappers.toUserRegisterResponse
 import com.mobile.data.local.mappers.toVerifyOtpResponse
+import com.mobile.data.local.models.DUser
 import com.mobile.data.local.room.Dao
 import com.mobile.data.remote.UserService
 import com.mobile.domain.models.LoginRequest
@@ -58,9 +60,27 @@ class UserRepositoryImpl @Inject constructor(
         return dao.getUser(id)?.toUser()
     }
 
-    override suspend fun loginUser(loginRequest: LoginRequest): LoginResponse {
-        val response = userService.loginUser(loginRequest.toDLoginRequest())
-        return response.body()?.toLoginResponse() ?: throw Exception("Login failed")
+    override suspend fun loginUser(loginRequest: LoginRequest): Resource<LoginResponse> {
+        try {
+            val response = userService.loginUser(loginRequest.toDLoginRequest())
+            return if (response.isSuccessful && response.body()!=null) {
+                Log.v("SUCCESS", response.body().toString())
+                val data: LoginResponse = response.body()!!.toLoginResponse()
+                saveAuthToken(data.token)
+                setIsLoggedIn(true)
+
+                val user = DUser(data.user.id, data.user.firstName, data.user.lastName, data.user.email, data.user.role)
+                insertUser(user.toUser())
+
+                Resource.success(data = data)
+            } else {
+                Log.v("FAILURE", response.body().toString())
+                Resource.error(response.body()?.message ?: "Something went wrong", null)
+            }
+        } catch (e: Exception) {
+            Log.v("EXCEPTION", e.message.toString())
+            return Resource.error("Something went wrong", null)
+        }
     }
 
     override suspend fun registerUser(userRegisterBody: UserRegisterBody): Resource<UserRegisterResponse> {
@@ -72,7 +92,10 @@ class UserRepositoryImpl @Inject constructor(
                 saveAuthToken(data.token)
                 setIsLoggedIn(true)
 
-                return Resource.success(data = data)
+                val user = DUser(data.user.id, data.user.firstName, data.user.lastName, data.user.email, data.user.role)
+                insertUser(user.toUser())
+
+               return Resource.success(data = data)
             } else {
                 try {
                     response.errorBody()?.string()?.let { errorBody ->
@@ -85,7 +108,7 @@ class UserRepositoryImpl @Inject constructor(
                 }
             }
         } catch (e: Exception) {
-            return Resource.error("Something went Wrong", null)
+           return Resource.error("Something went Wrong", null)
         }
         return Resource.error("Something went Wrong", null)
     }

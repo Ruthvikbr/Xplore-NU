@@ -6,18 +6,34 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.mobile.data.local.mappers.toDLoginRequest
+import com.mobile.data.local.mappers.toDRequestOtpRequest
+import com.mobile.data.local.mappers.toDRequestPasswordRequest
+import com.mobile.data.local.mappers.toDResendOtpRequest
 import com.mobile.data.local.mappers.toDUser
 import com.mobile.data.local.mappers.toDUserRegisterBody
+import com.mobile.data.local.mappers.toDVerifyOtpRequest
 import com.mobile.data.local.mappers.toLoginResponse
+import com.mobile.data.local.mappers.toRequestOtpResponse
+import com.mobile.data.local.mappers.toResendOtpResponse
+import com.mobile.data.local.mappers.toResetPasswordResponse
 import com.mobile.data.local.mappers.toUser
 import com.mobile.data.local.mappers.toUserRegisterResponse
+import com.mobile.data.local.mappers.toVerifyOtpResponse
 import com.mobile.data.local.room.Dao
 import com.mobile.data.remote.UserService
 import com.mobile.domain.models.LoginRequest
 import com.mobile.domain.models.LoginResponse
+import com.mobile.domain.models.RequestOtpRequest
+import com.mobile.domain.models.RequestOtpResponse
+import com.mobile.domain.models.ResendOtpRequest
+import com.mobile.domain.models.ResendOtpResponse
+import com.mobile.domain.models.ResetPasswordRequest
+import com.mobile.domain.models.ResetPasswordResponse
 import com.mobile.domain.models.User
 import com.mobile.domain.models.UserRegisterBody
 import com.mobile.domain.models.UserRegisterResponse
+import com.mobile.domain.models.VerifyOtpRequest
+import com.mobile.domain.models.VerifyOtpResponse
 import com.mobile.domain.repository.UserRepository
 import com.mobile.domain.utils.Resource
 import kotlinx.coroutines.flow.Flow
@@ -60,7 +76,7 @@ class UserRepositoryImpl @Inject constructor(
                 Resource.error(response.body()?.message ?: "Something went wrong", null)
             }
         } catch (e: Exception) {
-           return Resource.error("Something went Wrong", null)
+            return Resource.error("Something went Wrong", null)
         }
     }
 
@@ -94,5 +110,62 @@ class UserRepositoryImpl @Inject constructor(
 
     override val isLoggedIn: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[IS_LOGGED_IN_KEY] == true
+    }
+
+    override suspend fun requestOtp(requestOtpRequest: RequestOtpRequest): Resource<RequestOtpResponse> {
+        try {
+            val response = userService.requestOtp(requestOtpRequest.toDRequestOtpRequest())
+            return if (response.isSuccessful && response.body() != null) {
+                val data: RequestOtpResponse = response.body()!!.toRequestOtpResponse()
+                Resource.success(data = data)
+            } else {
+                Resource.error(response.body()?.message ?: "Something went wrong", null)
+            }
+        } catch (e: Exception) {
+            return Resource.error("Something went Wrong", null)
+        }
+    }
+
+    override suspend fun verifyOtp(verifyOtpRequest: VerifyOtpRequest): Resource<VerifyOtpResponse> {
+        try {
+            val response = userService.verifyOtp(verifyOtpRequest.toDVerifyOtpRequest())
+            return if (response.isSuccessful && response.body() != null) {
+                val data: VerifyOtpResponse = response.body()!!.toVerifyOtpResponse()
+                Resource.success(data = data)
+            } else {
+                Resource.error(response.body()?.message ?: "Something went wrong", null)
+            }
+        } catch (e: Exception) {
+            return Resource.error("Something went Wrong", null)
+        }
+    }
+
+    override suspend fun resendOtp(resendOtpRequest: ResendOtpRequest): Resource<ResendOtpResponse> {
+        try {
+            val response = userService.resendOtp(resendOtpRequest.toDResendOtpRequest())
+            return if (response.isSuccessful && response.body() != null) {
+                val data: ResendOtpResponse = response.body()!!.toResendOtpResponse()
+                Resource.success(data = data)
+            } else {
+                Resource.error(response.body()?.message ?: "Something went wrong", null)
+            }
+        } catch (e: Exception) {
+            return Resource.error("Something went Wrong", null)
+        }
+    }
+
+    override suspend fun resetPassword(resetPasswordRequest: ResetPasswordRequest): Resource<ResetPasswordResponse> {
+        try {
+            val response =
+                userService.resetPassword(resetPasswordRequest.toDRequestPasswordRequest())
+            return if (response.isSuccessful && response.body() != null) {
+                val data: ResetPasswordResponse = response.body()!!.toResetPasswordResponse()
+                Resource.success(data = data)
+            } else {
+                Resource.error(response.body()?.message ?: "Something went wrong", null)
+            }
+        } catch (e: Exception) {
+            return Resource.error("Something went Wrong", null)
+        }
     }
 }

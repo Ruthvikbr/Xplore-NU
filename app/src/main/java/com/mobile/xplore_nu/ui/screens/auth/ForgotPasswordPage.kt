@@ -1,5 +1,6 @@
 package com.mobile.xplore_nu.ui.screens.auth
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,6 +22,7 @@ import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -29,6 +31,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mobile.domain.models.RequestOtpResponse
+import com.mobile.domain.utils.Resource
+import com.mobile.domain.utils.Status
 import com.mobile.xplore_nu.ui.components.AppNameHeader
 import com.mobile.xplore_nu.ui.components.HuskyLogoImage
 import com.mobile.xplore_nu.ui.components.LeftChevron
@@ -42,7 +47,9 @@ fun ForgotPasswordPage(
     forgotPasswordState: ForgotPasswordState,
     onBackButtonClicked: () -> Unit,
     onEmailUpdated: (email: String) -> Unit,
-    onRequestOtpClicked: () -> Unit
+    onRequestOtpClicked: (email: String) -> Unit,
+    requestOtpResponse: Resource<RequestOtpResponse>,
+    navigateToVerifyOtpScreen: (email: String) -> Unit
 ) {
     val focusRequester = remember {
         FocusRequester()
@@ -52,6 +59,24 @@ fun ForgotPasswordPage(
 
     LaunchedEffect(true) {
         focusRequester.requestFocus()
+    }
+
+    val context = LocalContext.current
+
+    LaunchedEffect(requestOtpResponse) {
+        when (requestOtpResponse.status) {
+            Status.SUCCESS -> {
+                navigateToVerifyOtpScreen(forgotPasswordState.email)
+            }
+
+            Status.ERROR -> {
+                Toast.makeText(context, requestOtpResponse.message, Toast.LENGTH_LONG).show()
+            }
+
+            Status.LOADING -> {
+                // Idle state
+            }
+        }
     }
 
     Column(
@@ -109,9 +134,10 @@ fun ForgotPasswordPage(
                 .fillMaxWidth()
                 .height(54.dp)
                 .padding(start = 24.dp, end = 24.dp),
-            onClick = onRequestOtpClicked,
-//            enabled = forgotPasswordState.canRequestOtp,
-            enabled = true,
+            onClick = {
+                onRequestOtpClicked(forgotPasswordState.email)
+            },
+            enabled = forgotPasswordState.canRequestOtp,
             isLoading = forgotPasswordState.isLoading
         )
     }
@@ -124,6 +150,13 @@ fun ForgotPasswordPreview() {
         forgotPasswordState = ForgotPasswordState(
             canRequestOtp = true,
             isLoading = false
-        ), onBackButtonClicked = {}, onEmailUpdated = {},
-        onRequestOtpClicked = {})
+        ),
+        onBackButtonClicked = {},
+        onEmailUpdated = {},
+        onRequestOtpClicked = {},
+        navigateToVerifyOtpScreen = {},
+        requestOtpResponse = Resource.success<RequestOtpResponse>(
+            RequestOtpResponse("")
+        )
+    )
 }

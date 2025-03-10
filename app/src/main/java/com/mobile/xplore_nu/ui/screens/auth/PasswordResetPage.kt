@@ -1,5 +1,6 @@
 package com.mobile.xplore_nu.ui.screens.auth
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,6 +23,7 @@ import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -30,6 +32,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mobile.domain.models.ResetPasswordResponse
+import com.mobile.domain.utils.Resource
+import com.mobile.domain.utils.Status
 import com.mobile.xplore_nu.ui.components.AppNameHeader
 import com.mobile.xplore_nu.ui.components.HuskyLogoImage
 import com.mobile.xplore_nu.ui.components.LeftChevron
@@ -42,7 +47,11 @@ import com.mobile.xplore_nu.ui.uistates.ResetPasswordState
 fun PasswordResetPage(
     resetPasswordState: ResetPasswordState,
     onBackButtonClicked: () -> Unit,
-    onResetButtonClicked: () -> Unit
+    onResetButtonClicked: () -> Unit,
+    navigateToResetConfirmationPage: () -> Unit,
+    resetPasswordResponse: Resource<ResetPasswordResponse>,
+    onPasswordUpdated: (String) -> Unit,
+    onConfirmPasswordUpdated: (String) -> Unit,
 ) {
     val focusRequester = remember {
         FocusRequester()
@@ -52,6 +61,24 @@ fun PasswordResetPage(
 
     LaunchedEffect(true) {
         focusRequester.requestFocus()
+    }
+
+    val context = LocalContext.current
+
+    LaunchedEffect(resetPasswordResponse) {
+        when (resetPasswordResponse.status) {
+            Status.SUCCESS -> {
+                navigateToResetConfirmationPage()
+            }
+
+            Status.ERROR -> {
+                Toast.makeText(context, resetPasswordResponse.message, Toast.LENGTH_LONG).show()
+            }
+
+            Status.LOADING -> {
+                // Idle state
+            }
+        }
     }
 
     Column(
@@ -89,7 +116,7 @@ fun PasswordResetPage(
                 .focusRequester(focusRequester),
             label = "Password",
             value = resetPasswordState.password,
-            onValueChange = {},
+            onValueChange = onPasswordUpdated,
             isError = resetPasswordState.password.isNotEmpty() && !resetPasswordState.isPasswordValid,
             errorMessage = "Enter a valid password",
             keyboardOptions = KeyboardOptions(
@@ -107,11 +134,10 @@ fun PasswordResetPage(
         OutlinedTextFieldComponent(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 24.dp, end = 24.dp, bottom = 12.dp)
-                .focusRequester(focusRequester),
+                .padding(start = 24.dp, end = 24.dp, bottom = 12.dp),
             label = "Confirm Password",
             value = resetPasswordState.confirmPassword,
-            onValueChange = {},
+            onValueChange = onConfirmPasswordUpdated,
             isError = resetPasswordState.confirmPassword.isNotEmpty() && !resetPasswordState.isConfirmPasswordValid,
             errorMessage = "Enter a valid confirm password",
             keyboardOptions = KeyboardOptions(
@@ -127,16 +153,16 @@ fun PasswordResetPage(
         )
         Spacer(modifier = Modifier.height(64.dp))
         RedButton(
-            label = "Reset ", modifier = Modifier
+            label = "Done ",
+            modifier = Modifier
                 .fillMaxWidth()
                 .height(54.dp)
                 .padding(start = 24.dp, end = 24.dp),
             onClick = {
                 onResetButtonClicked()
             },
-//            enabled = forgotPasswordState.canRequestOtp,
-            enabled = true,
-            isLoading = false
+            enabled = resetPasswordState.isResetButtonEnabled,
+            isLoading = resetPasswordState.isLoading
         )
     }
 }
@@ -151,6 +177,13 @@ fun PasswordResetPagePreview(
     PasswordResetPage(
         resetPasswordState = ResetPasswordState(),
         onBackButtonClicked = {},
-        onResetButtonClicked = {})
+        onResetButtonClicked = {},
+        navigateToResetConfirmationPage = {},
+        Resource.success(
+            ResetPasswordResponse("")
+        ),
+        onPasswordUpdated = {},
+        onConfirmPasswordUpdated = {}
+    )
 
 }

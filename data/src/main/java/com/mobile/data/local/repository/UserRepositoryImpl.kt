@@ -38,6 +38,7 @@ import com.mobile.domain.repository.UserRepository
 import com.mobile.domain.utils.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import org.json.JSONObject
 import javax.inject.Inject
 
 class UserRepositoryImpl @Inject constructor(
@@ -65,19 +66,28 @@ class UserRepositoryImpl @Inject constructor(
     override suspend fun registerUser(userRegisterBody: UserRegisterBody): Resource<UserRegisterResponse> {
         try {
             val response = userService.registerUser(userRegisterBody.toDUserRegisterBody())
-            return if (response.isSuccessful && response.body() != null) {
+            if (response.isSuccessful && response.body() != null) {
                 val data: UserRegisterResponse = response.body()!!.toUserRegisterResponse()
 
                 saveAuthToken(data.token)
                 setIsLoggedIn(true)
 
-                Resource.success(data = data)
+                return Resource.success(data = data)
             } else {
-                Resource.error(response.body()?.message ?: "Something went wrong", null)
+                try {
+                    response.errorBody()?.string()?.let { errorBody ->
+                        val jsonObject = JSONObject(errorBody)
+                        val message = jsonObject.getString("message")
+                        return Resource.error(message, null)
+                    }
+                } catch (ex: Exception) {
+                    return Resource.error("Something went wrong", null)
+                }
             }
         } catch (e: Exception) {
             return Resource.error("Something went Wrong", null)
         }
+        return Resource.error("Something went Wrong", null)
     }
 
     override suspend fun logoutUser(): UserRegisterResponse {
@@ -115,57 +125,93 @@ class UserRepositoryImpl @Inject constructor(
     override suspend fun requestOtp(requestOtpRequest: RequestOtpRequest): Resource<RequestOtpResponse> {
         try {
             val response = userService.requestOtp(requestOtpRequest.toDRequestOtpRequest())
-            return if (response.isSuccessful && response.body() != null) {
+            if (response.isSuccessful && response.body() != null) {
                 val data: RequestOtpResponse = response.body()!!.toRequestOtpResponse()
-                Resource.success(data = data)
+                return Resource.success(data = data)
             } else {
-                Resource.error(response.body()?.message ?: "Something went wrong", null)
+                try {
+                    response.errorBody()?.string()?.let { errorBody ->
+                        val jsonObject = JSONObject(errorBody)
+                        val message = jsonObject.getString("message")
+                        return Resource.error(message, null)
+                    }
+                } catch (ex: Exception) {
+                    return Resource.error("Something went wrong", null)
+                }
             }
         } catch (e: Exception) {
             return Resource.error("Something went Wrong", null)
         }
+        return Resource.error("Something went Wrong", null)
     }
 
     override suspend fun verifyOtp(verifyOtpRequest: VerifyOtpRequest): Resource<VerifyOtpResponse> {
         try {
             val response = userService.verifyOtp(verifyOtpRequest.toDVerifyOtpRequest())
-            return if (response.isSuccessful && response.body() != null) {
+            if (response.isSuccessful && response.body() != null) {
                 val data: VerifyOtpResponse = response.body()!!.toVerifyOtpResponse()
-                Resource.success(data = data)
+                return Resource.success(data = data)
             } else {
-                Resource.error(response.body()?.message ?: "Something went wrong", null)
+                try {
+                    response.errorBody()?.string()?.let { errorBody ->
+                        val jsonObject = JSONObject(errorBody)
+                        val message = jsonObject.getString("message")
+                        return Resource.error(message, null)
+                    }
+                } catch (ex: Exception) {
+                    return Resource.error("Something went wrong", null)
+                }
             }
         } catch (e: Exception) {
             return Resource.error("Something went Wrong", null)
         }
+        return Resource.error("Something went Wrong", null)
     }
 
     override suspend fun resendOtp(resendOtpRequest: ResendOtpRequest): Resource<ResendOtpResponse> {
         try {
             val response = userService.resendOtp(resendOtpRequest.toDResendOtpRequest())
-            return if (response.isSuccessful && response.body() != null) {
+            if (response.isSuccessful && response.body() != null) {
                 val data: ResendOtpResponse = response.body()!!.toResendOtpResponse()
-                Resource.success(data = data)
+                return Resource.success(data = data)
             } else {
-                Resource.error(response.body()?.message ?: "Something went wrong", null)
+                try {
+                    response.errorBody()?.string()?.let { errorBody ->
+                        val jsonObject = JSONObject(errorBody)
+                        val message = jsonObject.getString("message")
+                        return Resource.error(message, null)
+                    }
+                } catch (ex: Exception) {
+                    return Resource.error("Something went wrong", null)
+                }
             }
         } catch (e: Exception) {
             return Resource.error("Something went Wrong", null)
         }
+        return Resource.error("Something went Wrong", null)
     }
 
     override suspend fun resetPassword(resetPasswordRequest: ResetPasswordRequest): Resource<ResetPasswordResponse> {
         try {
             val response =
                 userService.resetPassword(resetPasswordRequest.toDRequestPasswordRequest())
-            return if (response.isSuccessful && response.body() != null) {
+            if (response.isSuccessful && response.body() != null) {
                 val data: ResetPasswordResponse = response.body()!!.toResetPasswordResponse()
-                Resource.success(data = data)
+                return Resource.success(data = data)
             } else {
-                Resource.error(response.body()?.message ?: "Something went wrong", null)
+                try {
+                    response.errorBody()?.string()?.let { errorBody ->
+                        val jsonObject = JSONObject(errorBody)
+                        val message = jsonObject.getString("message")
+                        return Resource.error(message, null)
+                    }
+                } catch (ex: Exception) {
+                    return Resource.error("Something went wrong", null)
+                }
             }
         } catch (e: Exception) {
             return Resource.error("Something went Wrong", null)
         }
+        return Resource.error("Something went Wrong", null)
     }
 }

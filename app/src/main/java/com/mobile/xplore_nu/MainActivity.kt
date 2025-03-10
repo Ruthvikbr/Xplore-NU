@@ -1,5 +1,6 @@
 package com.mobile.xplore_nu
 
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -18,6 +19,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.mobile.xplore_nu.ui.screens.auth.AuthViewModel
 import com.mobile.xplore_nu.ui.screens.auth.ForgotPasswordPage
@@ -28,8 +30,8 @@ import com.mobile.xplore_nu.ui.screens.auth.RegistrationPage
 import com.mobile.xplore_nu.ui.screens.auth.ResetPasswordConfirmationPage
 import com.mobile.xplore_nu.ui.screens.tour.TourPage
 import com.mobile.xplore_nu.ui.theme.XploreNUTheme
-import com.mobile.xplore_nu.ui.uistates.ResetPasswordState
 import dagger.hilt.android.AndroidEntryPoint
+import java.nio.charset.StandardCharsets
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -99,41 +101,92 @@ private fun NavGraphBuilder.authNavigation(navController: NavController, viewMod
         }
         composable("forgot_password") {
             val state by viewModel.forgotPasswordState.collectAsState()
+            val requestOtpStatus by viewModel.requestOtpStatus.collectAsState()
             ForgotPasswordPage(
                 forgotPasswordState = state,
                 onBackButtonClicked = navController::popBackStack,
                 onEmailUpdated = viewModel::forgotPasswordEmailUpdated,
-                onRequestOtpClicked = {
-                    navController.navigate("otp_verification")
+                onRequestOtpClicked = viewModel::requestOtp,
+                requestOtpResponse = requestOtpStatus,
+                navigateToVerifyOtpScreen = { email ->
+                    viewModel.resetRequestOtpStatus()
+                    val encodedEmail = Uri.encode(email, StandardCharsets.UTF_8.toString())
+                    navController.navigate("otp_verification?email=$encodedEmail")
                 }
             )
         }
-        composable("otp_verification") {
+        composable(
+            "otp_verification?email={email}",
+            arguments = listOf(navArgument("email") { defaultValue = ""; nullable = false })
+        ) { backStackEntry ->
+            val email = backStackEntry.arguments?.getString("email")
+            val otpState by viewModel.otpState.collectAsState()
+            val verifyOtpStatus by viewModel.verifyOtpStatus.collectAsState()
+            val resendOtpStatus by viewModel.resendOtpStatus.collectAsState()
+
             OtpVerificationPage(
-                onBackButtonClicked = navController::popBackStack,
-                onVerifyOtpButtonClicked = {
-                    navController.navigate("password_reset")
-                })
+                onBackButtonClicked = {
+                    navController.navigate("login") {
+                        popUpTo("auth") { inclusive = true }
+                    }
+                },
+                onVerifyOtpButtonClicked = { otp ->
+                    viewModel.verifyOtp(email!!, otp)
+                },
+                otpState,
+                onResendOtpButtonClicked = {
+                    viewModel.resendOtp(email!!)
+                },
+                onOtpValueChanged = viewModel::updateOtp,
+                verifyOtpStatus,
+                resendOtpStatus,
+                navigateToPasswordResetScreen = {
+                    viewModel.resetVerifyOtpStatus()
+                    navController.navigate("password_reset?email=$email")
+                }
+            )
         }
 
-        composable("password_reset") {
+        composable(
+            "password_reset?email={email}",
+            arguments = listOf(navArgument("email") { defaultValue = ""; nullable = false })
+        ) { backStackEntry ->
+            val email = backStackEntry.arguments?.getString("email")
+            val resetPasswordStatus by viewModel.resetPasswordStatus.collectAsState()
+            val resetPasswordState by viewModel.resetPasswordState.collectAsState()
+
             PasswordResetPage(
-                resetPasswordState = ResetPasswordState(),
-                onBackButtonClicked = navController::popBackStack,
+                resetPasswordState,
+                onBackButtonClicked = {
+                    navController.navigate("login") {
+                        popUpTo("auth") { inclusive = true }
+                    }
+                },
                 onResetButtonClicked = {
+                    viewModel.resetPassword(email!!, resetPasswordState.password)
+                },
+                navigateToResetConfirmationPage = {
+                    viewModel.resetResendOtpStatus()
                     navController.navigate("reset_confirmation")
-                })
+                },
+                resetPasswordStatus,
+                onPasswordUpdated = viewModel::updateNewPassword,
+                onConfirmPasswordUpdated = viewModel::updateNewConfirmPassword,
+            )
         }
         composable("reset_confirmation") {
-            ResetPasswordConfirmationPage(onBackToLoginButtonClicked = {
-                navController.navigate("login") {
-                    popUpTo("auth") { inclusive = true }
-                }
-            }, onBackButtonClicked = {
-                navController.navigate("login") {
-                    popUpTo("auth") { inclusive = true }
-                }
-            })
+            ResetPasswordConfirmationPage(
+                onBackToLoginButtonClicked = {
+                    navController.navigate("login") {
+                        popUpTo("auth") { inclusive = true }
+                    }
+                },
+                onBackButtonClicked = {
+                    navController.navigate("login") {
+                        popUpTo("auth") { inclusive = true }
+                    }
+                },
+            )
         }
     }
 }

@@ -5,7 +5,6 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.mobile.data.local.models.DUser
-import com.mobile.domain.models.User
 
 @Dao
 interface Dao {

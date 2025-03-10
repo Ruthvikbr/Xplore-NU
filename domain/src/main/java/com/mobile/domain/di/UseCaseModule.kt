@@ -6,6 +6,7 @@ import com.mobile.domain.usecases.InsertUserUseCase
 import com.mobile.domain.usecases.LoginUserUseCase
 import com.mobile.domain.usecases.LogoutUserUseCase
 import com.mobile.domain.usecases.RegisterUserUseCase
+import com.mobile.domain.usecases.ResetPasswordUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -35,5 +36,9 @@ object UseCaseModule {
     @Provides
     @Singleton
     fun provideRegisterUserUseCase(userRepository: UserRepository) = RegisterUserUseCase(userRepository)
+
+    @Provides
+    @Singleton
+    fun provideResetPasswordUseCase(userRepository: UserRepository) = ResetPasswordUseCase(userRepository)
 
 }

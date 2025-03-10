@@ -14,7 +14,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,9 +31,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import com.mobile.domain.models.LoginResponse
-import com.mobile.domain.models.UserRegisterResponse
 import com.mobile.domain.utils.Resource
 import com.mobile.domain.utils.Status
 import com.mobile.xplore_nu.ui.components.AppNameHeader
@@ -43,8 +40,6 @@ import com.mobile.xplore_nu.ui.components.OutlinedTextFieldComponent
 import com.mobile.xplore_nu.ui.components.RedButton
 import com.mobile.xplore_nu.ui.theme.fontFamily
 import com.mobile.xplore_nu.ui.uistates.LoginState
-import com.mobile.xplore_nu.ui.uistates.RegisterState
-import com.mobile.xplore_nu.ui.utils.Validators.isValidEmail
 
 @Composable
 fun LoginPage(

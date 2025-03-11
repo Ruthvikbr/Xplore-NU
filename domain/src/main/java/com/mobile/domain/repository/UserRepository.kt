@@ -2,11 +2,13 @@ package com.mobile.domain.repository
 
 import com.mobile.domain.models.LoginRequest
 import com.mobile.domain.models.LoginResponse
+import com.mobile.domain.models.LogoutResponse
 import com.mobile.domain.models.User
 import com.mobile.domain.models.UserRegisterBody
 import com.mobile.domain.models.UserRegisterResponse
 import com.mobile.domain.utils.Resource
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 
 interface UserRepository {
 
@@ -18,9 +20,7 @@ interface UserRepository {
 
     suspend fun registerUser(userRegisterBody: UserRegisterBody): Resource<UserRegisterResponse>
 
-    suspend fun logoutUser(): UserRegisterResponse
-
-    suspend fun setIsLoggedIn(isLoggedIn: Boolean)
+    suspend fun logoutUser(): Resource<LogoutResponse>
 
     val isLoggedIn: Flow<Boolean>
 
@@ -29,4 +29,8 @@ interface UserRepository {
     val authToken: Flow<String?>
 
     suspend fun saveAuthToken(token: String)
+
+    suspend fun updateLoginState(isLoggedIn: Boolean)
+
+    fun observeAuthState(): Flow<Boolean>
 }

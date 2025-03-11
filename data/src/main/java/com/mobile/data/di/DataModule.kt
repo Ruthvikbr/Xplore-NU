@@ -6,9 +6,11 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
 import com.mobile.data.local.repository.UserRepositoryImpl
+import com.mobile.data.local.room.AuthDao
 import com.mobile.data.local.room.Dao
 import com.mobile.data.local.room.XploreNUDatabase
 import com.mobile.data.remote.UserService
+import com.mobile.data.util.LoginPreferenceDataStore
 import com.mobile.domain.repository.UserRepository
 import dagger.Module
 import dagger.Provides
@@ -32,11 +34,17 @@ object DataModule {
 
     @Singleton
     @Provides
+    fun provideAuthDao(xploreNUDatabase: XploreNUDatabase) = xploreNUDatabase.getAuthDao()
+
+    @Singleton
+    @Provides
     fun provideUserRepository(
         dao: Dao,
+        authDao: AuthDao,
         userService: UserService,
-        dataStore: DataStore<Preferences>
-    ): UserRepository = UserRepositoryImpl(dao, userService, dataStore)
+        dataStore: DataStore<Preferences>,
+        loginPreferenceDataStore: LoginPreferenceDataStore
+    ): UserRepository = UserRepositoryImpl(dao, authDao, userService, dataStore)
 
     private const val USER_PREFERENCES_NAME = "user_preferences"
 

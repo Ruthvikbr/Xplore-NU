@@ -1,22 +1,28 @@
 package com.mobile.xplore_nu.ui.screens.auth
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobile.domain.models.LoginRequest
 import com.mobile.domain.models.LoginResponse
+import com.mobile.domain.models.LogoutResponse
 import com.mobile.domain.models.UserRegisterBody
 import com.mobile.domain.models.UserRegisterResponse
+import com.mobile.domain.usecases.AuthStatusUseCase
 import com.mobile.domain.usecases.LoginUserUseCase
+import com.mobile.domain.usecases.LogoutUserUseCase
 import com.mobile.domain.usecases.RegisterUserUseCase
 import com.mobile.domain.utils.Resource
 import com.mobile.xplore_nu.ui.uistates.LoginState
+import com.mobile.xplore_nu.ui.uistates.LogoutState
 import com.mobile.xplore_nu.ui.uistates.RegisterState
 import com.mobile.xplore_nu.ui.utils.Validators.isValidEmail
 import com.mobile.xplore_nu.ui.utils.Validators.isValidName
 import com.mobile.xplore_nu.ui.utils.Validators.isValidPassword
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -25,6 +31,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -37,6 +44,7 @@ import javax.inject.Inject
 class AuthViewModel @Inject constructor(
     private val loginUserUseCase: LoginUserUseCase,
     private val registerUserUseCase: RegisterUserUseCase,
+    private val authStatusUseCase: AuthStatusUseCase
 ) : ViewModel() {
 
     private val _registerState = MutableStateFlow<RegisterState>(RegisterState())
@@ -52,14 +60,16 @@ class AuthViewModel @Inject constructor(
     private val _loginStatus = MutableStateFlow<Resource<LoginResponse>>(Resource.loading(null))
     val loginStatus = _loginStatus.asStateFlow()
 
-    val isLoggedIn: StateFlow<Boolean?> = registerUserUseCase.isLoggedIn()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = null,
-        )
+    val isLoggedIn: StateFlow<Boolean> = authStatusUseCase.isLoggedIn()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     init {
+
+        viewModelScope.launch {
+            isLoggedIn.collect { value ->
+                Log.d("MainViewModel", "Observed isLoggedIn: $value")
+            }
+        }
 
         registerState.distinctUntilChangedBy { it.firstName }.map {
             it.firstName.trim().isValidName()
@@ -223,6 +233,7 @@ class AuthViewModel @Inject constructor(
                     state.password
                 )
             )
+            //authStatusUseCase.updateLoginState(true)
             _registerStatus.emit(response)
             _registerState.update {
                 it.copy(
@@ -262,6 +273,7 @@ class AuthViewModel @Inject constructor(
                     state.password
                 )
             )
+            //authStatusUseCase.updateLoginState(true)
             _loginStatus.emit(response)
             _loginState.update {
                 it.copy(

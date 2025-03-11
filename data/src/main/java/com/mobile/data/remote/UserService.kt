@@ -2,6 +2,7 @@ package com.mobile.data.remote
 
 import com.mobile.data.remote.models.DLoginRequest
 import com.mobile.data.remote.models.DLoginResponse
+import com.mobile.data.remote.models.DLogoutResponse
 import com.mobile.data.remote.models.DUserResponse
 import com.mobile.data.remote.models.DUserRegisterBody
 import com.mobile.data.remote.models.DUserRegisterResponse
@@ -22,6 +23,6 @@ interface UserService {
     suspend fun getUsers(): Response<List<DUserResponse>>
 
     @POST("/auth/logout")
-    suspend fun logoutUser(): Response<DUserRegisterResponse>
+    suspend fun logoutUser(): Response<DLogoutResponse>
 
 }

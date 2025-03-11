@@ -1,6 +1,7 @@
 package com.mobile.data.local.room
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -15,4 +16,7 @@ interface Dao {
 
     @Query("SELECT * FROM DUser WHERE id=:id")
     fun getUser(id: String): DUser?
+
+    @Query("DELETE FROM DUser")
+    suspend fun deleteUsers()
 }

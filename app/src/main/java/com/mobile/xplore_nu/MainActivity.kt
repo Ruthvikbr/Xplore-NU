@@ -13,6 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -24,12 +25,14 @@ import com.mobile.xplore_nu.ui.screens.auth.AuthViewModel
 import com.mobile.xplore_nu.ui.screens.auth.LoginPage
 import com.mobile.xplore_nu.ui.screens.auth.RegistrationPage
 import com.mobile.xplore_nu.ui.screens.tour.TourPage
+import com.mobile.xplore_nu.ui.screens.tour.TourViewModel
 import com.mobile.xplore_nu.ui.theme.XploreNUTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val authViewModel: AuthViewModel by viewModels()
+    private val tourViewModel: TourViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,26 +41,27 @@ class MainActivity : ComponentActivity() {
         setContent {
             XploreNUTheme {
                 val navController = rememberNavController()
-                val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
+                val isLoggedIn by  authViewModel.isLoggedIn.collectAsStateWithLifecycle(initialValue = false)
 
-                splashScreen.setKeepOnScreenCondition { isLoggedIn == null }
+                //splashScreen.setKeepOnScreenCondition { isLoggedIn == false }
+
+                Log.d("MainActivity", "Login state observed in UI: $isLoggedIn")
 
                 LaunchedEffect(isLoggedIn) {
-                    isLoggedIn?.let { loggedIn ->
-                        val destination = if (loggedIn) "home" else "auth"
-                        navController.navigate(destination) {
-                            popUpTo(if (loggedIn) "auth" else "home") { inclusive = true }
-                        }
+                    val destination = if (isLoggedIn) "home" else "auth"
+                    Log.d("MainActivity", "Navigating to: $destination")
+                    navController.navigate(destination) {
+                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
                     }
                 }
 
                 NavHost(
                     navController = navController,
-                    startDestination = isLoggedIn?.let { if (it) "home" else "auth" } ?: "splash" // Placeholder, handled by LaunchedEffect
+                    startDestination = "splash" // Placeholder, handled by LaunchedEffect
                 ) {
                     composable("splash") {  }
                     authNavigation(navController, authViewModel)
-                    homeNavigation(navController)
+                    homeNavigation(navController, tourViewModel)
                 }
             }
         }
@@ -108,10 +112,15 @@ private fun NavGraphBuilder.authNavigation(navController: NavController, viewMod
     }
 }
 
-private fun NavGraphBuilder.homeNavigation(navController: NavController) {
+private fun NavGraphBuilder.homeNavigation(navController: NavController, viewModel: TourViewModel) {
     navigation(startDestination = "tour", route = "home") {
         composable("tour") {
-            TourPage()
+            TourPage(onButtonClicked = {
+                viewModel.logoutUser()
+                navController.navigate("auth") {
+                    popUpTo("login") { inclusive = true }
+                }
+            })
         }
     }
 }

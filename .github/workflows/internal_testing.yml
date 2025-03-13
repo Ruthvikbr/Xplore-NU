@@ -34,7 +34,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run Unit Tests
-        run: ./gradlew test --stacktrace
+        run: ./gradlew test --configuration-cache
 
   distribute:
     name: Deploy app to internal testing track on Play Console

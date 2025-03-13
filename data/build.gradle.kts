@@ -4,6 +4,7 @@ plugins {
     id("com.google.devtools.ksp")
     id("dagger.hilt.android.plugin")
     id("org.jetbrains.kotlin.plugin.parcelize")
+//    id("com.google.protobuf")
 }
 
 android {
@@ -33,6 +34,12 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+
+//    sourceSets { //This is the correction.
+//        getByName("main") {
+//            kotlin.srcDir("${layout.buildDirectory}/generated/source/proto/main/kotlin")
+//        }
+//    }
 }
 
 dependencies {
@@ -60,4 +67,22 @@ dependencies {
 
     implementation(libs.logging.interceptor)
     implementation(libs.androidx.datastore.preferences)
+
+//    implementation("androidx.datastore:datastore:1.0.0")
+//    implementation("com.google.protobuf:protobuf-javalite:3.21.2")
+
+
 }
+//
+//protobuf {
+//    protoc {
+//        artifact = "com.google.protobuf:protoc:3.21.2"
+//    }
+//    generateProtoTasks {
+//        all().forEach { task ->
+//            task.plugins.create("java") {
+//                option("lite")
+//            }
+//        }
+//    }
+//}

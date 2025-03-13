@@ -1,4 +1,4 @@
-package com.mobile.xplore_nu.ui.screens.auth
+package com.mobile.xplore_nu.ui.screens.auth.login
 
 import android.widget.Toast
 import androidx.compose.foundation.clickable
@@ -31,7 +31,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mobile.domain.models.LoginResponse
+import com.mobile.domain.models.AuthenticationResponse
 import com.mobile.domain.utils.Resource
 import com.mobile.domain.utils.Status
 import com.mobile.xplore_nu.ui.components.AppNameHeader
@@ -43,12 +43,11 @@ import com.mobile.xplore_nu.ui.uistates.LoginState
 
 @Composable
 fun LoginPage(
-    onRegisterButtonClicked : () -> Unit,
+    onRegisterButtonClicked: () -> Unit,
     loginState: LoginState,
-    onBackButtonClicked: () -> Unit,
     onEmailUpdated: (email: String) -> Unit,
     onPasswordUpdated: (password: String) -> Unit,
-    loginStatus: Resource<LoginResponse>,
+    loginStatus: Resource<AuthenticationResponse>,
     onLoginButtonClicked: (state: LoginState) -> Unit,
     navigateToHomeScreen: () -> Unit,
     onForgotPasswordButtonClicked: () -> Unit
@@ -67,13 +66,15 @@ fun LoginPage(
 
     LaunchedEffect(loginStatus) {
         when (loginStatus.status) {
-            Status.SUCCESS ->  {
+            Status.SUCCESS -> {
                 navigateToHomeScreen()
             }
-            Status.ERROR ->  {
+
+            Status.ERROR -> {
                 Toast.makeText(context, loginStatus.message, Toast.LENGTH_LONG).show()
             }
-            Status.LOADING ->  {
+
+            Status.LOADING -> {
                 // Idle state
             }
         }
@@ -151,7 +152,7 @@ fun LoginPage(
         }
         RedButton(
             label = "Login",
-            onClick = {onLoginButtonClicked(loginState)},
+            onClick = { onLoginButtonClicked(loginState) },
             enabled = loginState.canLogin,
             isLoading = loginState.isLoading
         )

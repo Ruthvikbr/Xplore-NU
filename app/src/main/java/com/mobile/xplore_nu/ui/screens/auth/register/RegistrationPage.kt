@@ -1,4 +1,4 @@
-package com.mobile.xplore_nu.ui.screens.auth
+package com.mobile.xplore_nu.ui.screens.auth.register
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
@@ -32,7 +32,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mobile.domain.models.UserRegisterResponse
+import com.mobile.domain.models.AuthenticationResponse
 import com.mobile.domain.utils.Resource
 import com.mobile.domain.utils.Status
 import com.mobile.xplore_nu.ui.components.AppNameHeader
@@ -53,7 +53,7 @@ fun RegistrationPage(
     onEmailUpdated: (email: String) -> Unit,
     onPasswordUpdated: (password: String) -> Unit,
     onConfirmPasswordUpdated: (confirmPassword: String) -> Unit,
-    registrationStatus: Resource<UserRegisterResponse>,
+    registrationStatus: Resource<AuthenticationResponse>,
     navigateToHomeScreen: () -> Unit,
 ) {
 

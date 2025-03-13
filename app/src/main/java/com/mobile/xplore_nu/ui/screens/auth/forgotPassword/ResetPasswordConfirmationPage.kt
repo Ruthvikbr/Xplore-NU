@@ -1,4 +1,4 @@
-package com.mobile.xplore_nu.ui.screens.auth
+package com.mobile.xplore_nu.ui.screens.auth.forgotPassword
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

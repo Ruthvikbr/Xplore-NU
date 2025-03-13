@@ -1,6 +1,5 @@
-package com.mobile.xplore_nu.ui.screens.auth
+package com.mobile.xplore_nu.ui.screens.auth.forgotPassword
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -70,8 +69,7 @@ fun OtpVerificationPage(
     LaunchedEffect(resendOtpResponse) {
         when (resendOtpResponse.status) {
             Status.SUCCESS -> {
-                Log.d("response", "${resendOtpResponse.message} ")
-            //Toast.makeText(newContext, resendOtpResponse.message, Toast.LENGTH_LONG).show()
+             Toast.makeText(context, resendOtpResponse.message, Toast.LENGTH_LONG).show()
             }
 
             Status.ERROR -> {

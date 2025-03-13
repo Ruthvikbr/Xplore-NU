@@ -1,7 +1,7 @@
 package com.mobile.domain.models
 
-data class LoginResponse(
+data class AuthenticationResponse(
     val message: String,
     val token: String,
-    val user: LoggedInUser
+    val user: User
 )

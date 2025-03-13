@@ -6,7 +6,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -21,21 +20,24 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
-import com.mobile.xplore_nu.ui.screens.auth.AuthViewModel
-import com.mobile.xplore_nu.ui.screens.auth.ForgotPasswordPage
-import com.mobile.xplore_nu.ui.screens.auth.LoginPage
-import com.mobile.xplore_nu.ui.screens.auth.OtpVerificationPage
-import com.mobile.xplore_nu.ui.screens.auth.PasswordResetPage
-import com.mobile.xplore_nu.ui.screens.auth.RegistrationPage
-import com.mobile.xplore_nu.ui.screens.auth.ResetPasswordConfirmationPage
+import com.mobile.xplore_nu.ui.screens.auth.forgotPassword.ForgotPasswordPage
+import com.mobile.xplore_nu.ui.screens.auth.forgotPassword.ForgotPasswordViewModel
+import com.mobile.xplore_nu.ui.screens.auth.forgotPassword.OtpVerificationPage
+import com.mobile.xplore_nu.ui.screens.auth.forgotPassword.PasswordResetPage
+import com.mobile.xplore_nu.ui.screens.auth.forgotPassword.ResetPasswordConfirmationPage
+import com.mobile.xplore_nu.ui.screens.auth.login.LoginPage
+import com.mobile.xplore_nu.ui.screens.auth.login.LoginViewModel
+import com.mobile.xplore_nu.ui.screens.auth.register.RegisterViewModel
+import com.mobile.xplore_nu.ui.screens.auth.register.RegistrationPage
 import com.mobile.xplore_nu.ui.screens.tour.TourPage
+import com.mobile.xplore_nu.ui.screens.tour.TourViewModel
 import com.mobile.xplore_nu.ui.theme.XploreNUTheme
 import dagger.hilt.android.AndroidEntryPoint
 import java.nio.charset.StandardCharsets
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val authViewModel: AuthViewModel by viewModels()
+    private val splashViewModel: SplashViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,26 +46,17 @@ class MainActivity : ComponentActivity() {
         setContent {
             XploreNUTheme {
                 val navController = rememberNavController()
-                val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
+                val isLoggedIn by splashViewModel.isLoggedIn.collectAsState()
 
                 splashScreen.setKeepOnScreenCondition { isLoggedIn == null }
-
-                LaunchedEffect(isLoggedIn) {
-                    isLoggedIn?.let { loggedIn ->
-                        val destination = if (loggedIn) "home" else "auth"
-                        navController.navigate(destination) {
-                            popUpTo(if (loggedIn) "auth" else "home") { inclusive = true }
-                        }
-                    }
-                }
 
                 NavHost(
                     navController = navController,
                     startDestination = isLoggedIn?.let { if (it) "home" else "auth" }
-                        ?: "splash" // Placeholder, handled by LaunchedEffect
+                        ?: "splash"
                 ) {
                     composable("splash") { }
-                    authNavigation(navController, authViewModel)
+                    authNavigation(navController)
                     homeNavigation(navController)
                 }
             }
@@ -71,23 +64,21 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private fun NavGraphBuilder.authNavigation(navController: NavController, viewModel: AuthViewModel) {
+private fun NavGraphBuilder.authNavigation(navController: NavController) {
     navigation(startDestination = "login", route = "auth") {
         composable("login") {
-            val state by viewModel.loginState.collectAsState()
-            val loginStatus by viewModel.loginStatus.collectAsState()
+            val loginViewModel: LoginViewModel = hiltViewModel()
+            val state by loginViewModel.loginState.collectAsState()
+            val loginStatus by loginViewModel.loginStatus.collectAsState()
             LoginPage(
                 onRegisterButtonClicked = { navController.navigate("register") },
                 loginState = state,
-                onBackButtonClicked = navController::popBackStack,
-                onEmailUpdated = viewModel::updateEmailForLogin,
-                onPasswordUpdated = viewModel::updatePasswordForLogin,
+                onEmailUpdated = loginViewModel::updateEmailForLogin,
+                onPasswordUpdated = loginViewModel::updatePasswordForLogin,
                 loginStatus = loginStatus,
-                onLoginButtonClicked = viewModel::loginUser,
+                onLoginButtonClicked = loginViewModel::loginUser,
                 navigateToHomeScreen = {
-                    navController.navigate("home") {
-                        popUpTo("auth") { inclusive = true }
-                    }
+                    navController.navigate("home")
                 },
                 onForgotPasswordButtonClicked = {
                     navController.navigate("forgot_password")
@@ -95,17 +86,18 @@ private fun NavGraphBuilder.authNavigation(navController: NavController, viewMod
             )
         }
         composable("register") {
-            val state by viewModel.registerState.collectAsState()
-            val registrationStatus by viewModel.registerStatus.collectAsState()
+            val registerViewModel: RegisterViewModel = hiltViewModel()
+            val state by registerViewModel.registerState.collectAsState()
+            val registrationStatus by registerViewModel.registerStatus.collectAsState()
             RegistrationPage(
                 state,
                 onBackButtonClicked = navController::popBackStack,
-                onRegisterButtonClicked = viewModel::registerUser,
-                onFirstNameUpdated = viewModel::updateFirstName,
-                onLastNameUpdated = viewModel::updateLastName,
-                onEmailUpdated = viewModel::updateEmail,
-                onPasswordUpdated = viewModel::updatePassword,
-                onConfirmPasswordUpdated = viewModel::updateConfirmPassword,
+                onRegisterButtonClicked = registerViewModel::registerUser,
+                onFirstNameUpdated = registerViewModel::updateFirstName,
+                onLastNameUpdated = registerViewModel::updateLastName,
+                onEmailUpdated = registerViewModel::updateEmail,
+                onPasswordUpdated = registerViewModel::updatePassword,
+                onConfirmPasswordUpdated = registerViewModel::updateConfirmPassword,
                 registrationStatus,
                 navigateToHomeScreen = {
                     navController.navigate("home") {
@@ -114,17 +106,19 @@ private fun NavGraphBuilder.authNavigation(navController: NavController, viewMod
                 }
             )
         }
+
         composable("forgot_password") {
-            val state by viewModel.forgotPasswordState.collectAsState()
-            val requestOtpStatus by viewModel.requestOtpStatus.collectAsState()
+            val forgotPasswordViewModel = it.sharedViewModel<ForgotPasswordViewModel>(navController)
+            val state by forgotPasswordViewModel.forgotPasswordState.collectAsState()
+            val requestOtpStatus by forgotPasswordViewModel.requestOtpStatus.collectAsState()
             ForgotPasswordPage(
                 forgotPasswordState = state,
                 onBackButtonClicked = navController::popBackStack,
-                onEmailUpdated = viewModel::forgotPasswordEmailUpdated,
-                onRequestOtpClicked = viewModel::requestOtp,
+                onEmailUpdated = forgotPasswordViewModel::forgotPasswordEmailUpdated,
+                onRequestOtpClicked = forgotPasswordViewModel::requestOtp,
                 requestOtpResponse = requestOtpStatus,
                 navigateToVerifyOtpScreen = { email ->
-                    viewModel.resetRequestOtpStatus()
+                    forgotPasswordViewModel.resetRequestOtpStatus()
                     val encodedEmail = Uri.encode(email, StandardCharsets.UTF_8.toString())
                     navController.navigate("otp_verification?email=$encodedEmail")
                 }
@@ -134,6 +128,7 @@ private fun NavGraphBuilder.authNavigation(navController: NavController, viewMod
             "otp_verification?email={email}",
             arguments = listOf(navArgument("email") { defaultValue = ""; nullable = false })
         ) { backStackEntry ->
+            val viewModel = backStackEntry.sharedViewModel<ForgotPasswordViewModel>(navController)
             val email = backStackEntry.arguments?.getString("email")
             val otpState by viewModel.otpState.collectAsState()
             val verifyOtpStatus by viewModel.verifyOtpStatus.collectAsState()
@@ -166,6 +161,7 @@ private fun NavGraphBuilder.authNavigation(navController: NavController, viewMod
             "password_reset?email={email}",
             arguments = listOf(navArgument("email") { defaultValue = ""; nullable = false })
         ) { backStackEntry ->
+            val viewModel = backStackEntry.sharedViewModel<ForgotPasswordViewModel>(navController)
             val email = backStackEntry.arguments?.getString("email")
             val resetPasswordStatus by viewModel.resetPasswordStatus.collectAsState()
             val resetPasswordState by viewModel.resetPasswordState.collectAsState()
@@ -209,7 +205,15 @@ private fun NavGraphBuilder.authNavigation(navController: NavController, viewMod
 private fun NavGraphBuilder.homeNavigation(navController: NavController) {
     navigation(startDestination = "tour", route = "home") {
         composable("tour") {
-            TourPage()
+            val viewModel = it.sharedViewModel<TourViewModel>(navController)
+            TourPage(
+                onButtonClicked = {
+                    viewModel.logoutUser()
+                    navController.navigate("auth") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                }
+            )
         }
     }
 }

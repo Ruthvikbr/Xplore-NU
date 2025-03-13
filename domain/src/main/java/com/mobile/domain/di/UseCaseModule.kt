@@ -1,6 +1,7 @@
 package com.mobile.domain.di
 
 import com.mobile.domain.repository.UserRepository
+import com.mobile.domain.usecases.DataStoreUseCase
 import com.mobile.domain.usecases.GetUserUseCase
 import com.mobile.domain.usecases.InsertUserUseCase
 import com.mobile.domain.usecases.LoginUserUseCase
@@ -40,5 +41,9 @@ object UseCaseModule {
     @Provides
     @Singleton
     fun provideResetPasswordUseCase(userRepository: UserRepository) = ResetPasswordUseCase(userRepository)
+
+    @Provides
+    @Singleton
+    fun provideDataStoreUseCase(userRepository: UserRepository) = DataStoreUseCase(userRepository)
 
 }

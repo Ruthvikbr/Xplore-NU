@@ -1,11 +1,11 @@
 package com.mobile.data.local.repository
 
-import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.mobile.data.local.mappers.toAuthenticationResponse
 import com.mobile.data.local.mappers.toDLoginRequest
 import com.mobile.data.local.mappers.toDRequestOtpRequest
 import com.mobile.data.local.mappers.toDRequestPasswordRequest
@@ -13,18 +13,18 @@ import com.mobile.data.local.mappers.toDResendOtpRequest
 import com.mobile.data.local.mappers.toDUser
 import com.mobile.data.local.mappers.toDUserRegisterBody
 import com.mobile.data.local.mappers.toDVerifyOtpRequest
-import com.mobile.data.local.mappers.toLoginResponse
+import com.mobile.data.local.mappers.toLogoutResponse
 import com.mobile.data.local.mappers.toRequestOtpResponse
 import com.mobile.data.local.mappers.toResendOtpResponse
 import com.mobile.data.local.mappers.toResetPasswordResponse
 import com.mobile.data.local.mappers.toUser
-import com.mobile.data.local.mappers.toUserRegisterResponse
 import com.mobile.data.local.mappers.toVerifyOtpResponse
 import com.mobile.data.local.models.DUser
 import com.mobile.data.local.room.Dao
 import com.mobile.data.remote.UserService
+import com.mobile.domain.models.AuthenticationResponse
 import com.mobile.domain.models.LoginRequest
-import com.mobile.domain.models.LoginResponse
+import com.mobile.domain.models.LogoutResponse
 import com.mobile.domain.models.RequestOtpRequest
 import com.mobile.domain.models.RequestOtpResponse
 import com.mobile.domain.models.ResendOtpRequest
@@ -33,7 +33,6 @@ import com.mobile.domain.models.ResetPasswordRequest
 import com.mobile.domain.models.ResetPasswordResponse
 import com.mobile.domain.models.User
 import com.mobile.domain.models.UserRegisterBody
-import com.mobile.domain.models.UserRegisterResponse
 import com.mobile.domain.models.VerifyOtpRequest
 import com.mobile.domain.models.VerifyOtpResponse
 import com.mobile.domain.repository.UserRepository
@@ -60,42 +59,50 @@ class UserRepositoryImpl @Inject constructor(
         return dao.getUser(id)?.toUser()
     }
 
-    override suspend fun loginUser(loginRequest: LoginRequest): Resource<LoginResponse> {
+    override suspend fun loginUser(loginRequest: LoginRequest): Resource<AuthenticationResponse> {
         try {
             val response = userService.loginUser(loginRequest.toDLoginRequest())
-            return if (response.isSuccessful && response.body()!=null) {
-                Log.v("SUCCESS", response.body().toString())
-                val data: LoginResponse = response.body()!!.toLoginResponse()
+            return if (response.isSuccessful && response.body() != null) {
+                val data: AuthenticationResponse = response.body()!!.toAuthenticationResponse()
                 saveAuthToken(data.token)
                 setIsLoggedIn(true)
 
-                val user = DUser(data.user.id, data.user.firstName, data.user.lastName, data.user.email, data.user.role)
+                val user = DUser(
+                    data.user.id,
+                    data.user.firstName,
+                    data.user.lastName,
+                    data.user.email,
+                    data.user.role
+                )
                 insertUser(user.toUser())
-
                 Resource.success(data = data)
             } else {
-                Log.v("FAILURE", response.body().toString())
                 Resource.error(response.body()?.message ?: "Something went wrong", null)
             }
         } catch (e: Exception) {
-            Log.v("EXCEPTION", e.message.toString())
             return Resource.error("Something went wrong", null)
         }
     }
 
-    override suspend fun registerUser(userRegisterBody: UserRegisterBody): Resource<UserRegisterResponse> {
+    override suspend fun registerUser(userRegisterBody: UserRegisterBody): Resource<AuthenticationResponse> {
         try {
             val response = userService.registerUser(userRegisterBody.toDUserRegisterBody())
             if (response.isSuccessful && response.body() != null) {
-                val data: UserRegisterResponse = response.body()!!.toUserRegisterResponse()
+                val data: AuthenticationResponse = response.body()!!.toAuthenticationResponse()
 
                 saveAuthToken(data.token)
-                setIsLoggedIn(true)
+                //setIsLoggedIn(true)
 
-                val user = DUser(data.user.id, data.user.firstName, data.user.lastName, data.user.email, data.user.role)
+                val user = DUser(
+                    data.user.id,
+                    data.user.firstName,
+                    data.user.lastName,
+                    data.user.email,
+                    data.user.role
+                )
                 insertUser(user.toUser())
 
-               return Resource.success(data = data)
+                return Resource.success(data = data)
             } else {
                 try {
                     response.errorBody()?.string()?.let { errorBody ->
@@ -108,14 +115,35 @@ class UserRepositoryImpl @Inject constructor(
                 }
             }
         } catch (e: Exception) {
-           return Resource.error("Something went Wrong", null)
+            return Resource.error("Something went Wrong", null)
         }
         return Resource.error("Something went Wrong", null)
     }
 
-    override suspend fun logoutUser(): UserRegisterResponse {
-        val response = userService.logoutUser()
-        return response.body()?.toUserRegisterResponse() ?: throw Exception("Logout failed")
+    override suspend fun logoutUser(): Resource<LogoutResponse> {
+        try {
+            val response = userService.logoutUser()
+            if (response.isSuccessful && response.body() != null) {
+                val data: LogoutResponse = response.body()!!.toLogoutResponse()
+                clearIsLoggedIn()
+                clearAuthToken()
+                return Resource.success(data = data)
+            } else {
+                try {
+                    response.errorBody()?.string()?.let { errorBody ->
+                        val jsonObject = JSONObject(errorBody)
+                        val message = jsonObject.getString("message")
+                        return Resource.error(message, null)
+                    }
+                } catch (ex: Exception) {
+                    return Resource.error("Something went wrong", null)
+                }
+            }
+
+        } catch (e: Exception) {
+            return Resource.error("Something went Wrong", null)
+        }
+        return Resource.error("Something went Wrong", null)
     }
 
 
@@ -143,6 +171,12 @@ class UserRepositoryImpl @Inject constructor(
 
     override val isLoggedIn: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[IS_LOGGED_IN_KEY] == true
+    }
+
+    override suspend fun clearIsLoggedIn() {
+        dataStore.edit { preferences ->
+            preferences.remove(IS_LOGGED_IN_KEY)
+        }
     }
 
     override suspend fun requestOtp(requestOtpRequest: RequestOtpRequest): Resource<RequestOtpResponse> {

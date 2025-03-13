@@ -1,4 +1,4 @@
-package com.mobile.xplore_nu.ui.screens.auth
+package com.mobile.xplore_nu.ui.screens.auth.forgotPassword
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
@@ -18,7 +18,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -32,7 +31,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mobile.domain.models.ResetPasswordResponse
+import com.mobile.domain.models.RequestOtpResponse
 import com.mobile.domain.utils.Resource
 import com.mobile.domain.utils.Status
 import com.mobile.xplore_nu.ui.components.AppNameHeader
@@ -41,17 +40,16 @@ import com.mobile.xplore_nu.ui.components.LeftChevron
 import com.mobile.xplore_nu.ui.components.OutlinedTextFieldComponent
 import com.mobile.xplore_nu.ui.components.RedButton
 import com.mobile.xplore_nu.ui.theme.fontFamily
-import com.mobile.xplore_nu.ui.uistates.ResetPasswordState
+import com.mobile.xplore_nu.ui.uistates.ForgotPasswordState
 
 @Composable
-fun PasswordResetPage(
-    resetPasswordState: ResetPasswordState,
+fun ForgotPasswordPage(
+    forgotPasswordState: ForgotPasswordState,
     onBackButtonClicked: () -> Unit,
-    onResetButtonClicked: () -> Unit,
-    navigateToResetConfirmationPage: () -> Unit,
-    resetPasswordResponse: Resource<ResetPasswordResponse>,
-    onPasswordUpdated: (String) -> Unit,
-    onConfirmPasswordUpdated: (String) -> Unit,
+    onEmailUpdated: (email: String) -> Unit,
+    onRequestOtpClicked: (email: String) -> Unit,
+    requestOtpResponse: Resource<RequestOtpResponse>,
+    navigateToVerifyOtpScreen: (email: String) -> Unit
 ) {
     val focusRequester = remember {
         FocusRequester()
@@ -65,14 +63,14 @@ fun PasswordResetPage(
 
     val context = LocalContext.current
 
-    LaunchedEffect(resetPasswordResponse) {
-        when (resetPasswordResponse.status) {
+    LaunchedEffect(requestOtpResponse) {
+        when (requestOtpResponse.status) {
             Status.SUCCESS -> {
-                navigateToResetConfirmationPage()
+                navigateToVerifyOtpScreen(forgotPasswordState.email)
             }
 
             Status.ERROR -> {
-                Toast.makeText(context, resetPasswordResponse.message, Toast.LENGTH_LONG).show()
+                Toast.makeText(context, requestOtpResponse.message, Toast.LENGTH_LONG).show()
             }
 
             Status.LOADING -> {
@@ -100,7 +98,7 @@ fun PasswordResetPage(
         AppNameHeader()
         HuskyLogoImage()
         Text(
-            text = "Reset Password",
+            text = "Enter email to receive OTP",
             style = TextStyle(
                 fontSize = 24.sp,
                 fontFamily = fontFamily,
@@ -114,76 +112,51 @@ fun PasswordResetPage(
                 .fillMaxWidth()
                 .padding(start = 24.dp, end = 24.dp, bottom = 12.dp)
                 .focusRequester(focusRequester),
-            label = "Password",
-            value = resetPasswordState.password,
-            onValueChange = onPasswordUpdated,
-            isError = resetPasswordState.password.isNotEmpty() && !resetPasswordState.isPasswordValid,
-            errorMessage = "Enter a valid password",
-            keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Next,
-                keyboardType = KeyboardType.Password
-            ),
-            keyboardActions = KeyboardActions(
-                onNext = {
-                    focusManager.moveFocus(FocusDirection.Down)
-                }
-            ),
-            enabled = !resetPasswordState.isLoading
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        OutlinedTextFieldComponent(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 24.dp, end = 24.dp, bottom = 12.dp),
-            label = "Confirm Password",
-            value = resetPasswordState.confirmPassword,
-            onValueChange = onConfirmPasswordUpdated,
-            isError = resetPasswordState.confirmPassword.isNotEmpty() && !resetPasswordState.isConfirmPasswordValid,
-            errorMessage = "Enter a valid confirm password",
+            label = "Email ID",
+            value = forgotPasswordState.email,
+            onValueChange = onEmailUpdated,
+            isError = forgotPasswordState.email.isNotEmpty() && !forgotPasswordState.isEmailValid,
+            errorMessage = "Enter a valid email ID",
             keyboardOptions = KeyboardOptions(
                 imeAction = ImeAction.Done,
-                keyboardType = KeyboardType.Password
+                keyboardType = KeyboardType.Email
             ),
             keyboardActions = KeyboardActions(
                 onDone = {
                     focusManager.clearFocus()
                 }
             ),
-            enabled = !resetPasswordState.isLoading
+            enabled = !forgotPasswordState.isLoading
         )
-        Spacer(modifier = Modifier.height(64.dp))
+        Spacer(modifier = Modifier.height(24.dp))
         RedButton(
-            label = "Done ",
-            modifier = Modifier
+            label = "Get OTP", modifier = Modifier
                 .fillMaxWidth()
                 .height(54.dp)
                 .padding(start = 24.dp, end = 24.dp),
             onClick = {
-                onResetButtonClicked()
+                onRequestOtpClicked(forgotPasswordState.email)
             },
-            enabled = resetPasswordState.isResetButtonEnabled,
-            isLoading = resetPasswordState.isLoading
+            enabled = forgotPasswordState.canRequestOtp,
+            isLoading = forgotPasswordState.isLoading
         )
     }
 }
 
-@Preview(
-    showBackground = true,
-    showSystemUi = true
-)
+@Preview(showSystemUi = true, showBackground = true)
 @Composable
-fun PasswordResetPagePreview(
-) {
-    PasswordResetPage(
-        resetPasswordState = ResetPasswordState(),
-        onBackButtonClicked = {},
-        onResetButtonClicked = {},
-        navigateToResetConfirmationPage = {},
-        Resource.success(
-            ResetPasswordResponse("")
+fun ForgotPasswordPreview() {
+    ForgotPasswordPage(
+        forgotPasswordState = ForgotPasswordState(
+            canRequestOtp = true,
+            isLoading = false
         ),
-        onPasswordUpdated = {},
-        onConfirmPasswordUpdated = {}
+        onBackButtonClicked = {},
+        onEmailUpdated = {},
+        onRequestOtpClicked = {},
+        navigateToVerifyOtpScreen = {},
+        requestOtpResponse = Resource.success<RequestOtpResponse>(
+            RequestOtpResponse("")
+        )
     )
-
 }

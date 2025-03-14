@@ -5,10 +5,23 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.BottomNavigation
+import androidx.compose.material.BottomNavigationItem
+import androidx.compose.material.Icon
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
@@ -17,6 +30,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
@@ -29,6 +43,7 @@ import com.mobile.xplore_nu.ui.screens.auth.login.LoginPage
 import com.mobile.xplore_nu.ui.screens.auth.login.LoginViewModel
 import com.mobile.xplore_nu.ui.screens.auth.register.RegisterViewModel
 import com.mobile.xplore_nu.ui.screens.auth.register.RegistrationPage
+import com.mobile.xplore_nu.ui.screens.tour.TopLevelRoute
 import com.mobile.xplore_nu.ui.screens.tour.TourPage
 import com.mobile.xplore_nu.ui.screens.tour.TourViewModel
 import com.mobile.xplore_nu.ui.theme.XploreNUTheme
@@ -50,14 +65,62 @@ class MainActivity : ComponentActivity() {
 
                 splashScreen.setKeepOnScreenCondition { isLoggedIn == null }
 
-                NavHost(
-                    navController = navController,
-                    startDestination = isLoggedIn?.let { if (it) "home" else "auth" }
-                        ?: "splash"
-                ) {
-                    composable("splash") { }
-                    authNavigation(navController)
-                    homeNavigation(navController)
+                val topLevelRouteNames = listOf("tour", "events", "chatbot", "account")
+                val topLevelRoutes = listOf(
+                    TopLevelRoute("Home", "tour", Icons.Default.Home),
+                    TopLevelRoute("Events", "events", ImageVector.vectorResource(id = R.drawable.calendar_icon)),
+                    TopLevelRoute("Chatbot", "chatbot", ImageVector.vectorResource(id = R.drawable.chatbot_icon)),
+                    TopLevelRoute("Account", "account", Icons.Default.Person)
+                )
+
+                Scaffold (
+                    bottomBar = {
+                        val navBackStackEntry by navController.currentBackStackEntryAsState()
+                        val currentRoute = navBackStackEntry?.destination?.route
+
+                        if (currentRoute in topLevelRouteNames) { // Show bottom bar only for these routes
+                            BottomNavigation (
+                                backgroundColor = Color.White
+                            ) {
+                                topLevelRoutes.forEach { route ->
+                                    BottomNavigationItem(
+                                        icon = { Icon(
+                                            route.icon,
+                                            contentDescription = route.name,
+                                            tint = if (currentRoute == route.route) Color.Red else Color.Black
+                                        ) },
+                                        label = { Text(
+                                            route.name,
+                                            color = if (currentRoute == route.route) Color.Red else Color.Black
+                                        ) },
+                                        selected = currentRoute == route.route,
+                                        selectedContentColor = Color.Red,
+                                        unselectedContentColor = Color.Black,
+                                        onClick = {
+                                            navController.navigate(route.route) {
+                                                popUpTo(navController.graph.startDestinationId) {
+                                                    saveState = true
+                                                }
+                                                launchSingleTop = true
+                                                restoreState = true
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                ) { innerPadding ->
+                    NavHost(
+                        navController = navController,
+                        startDestination = isLoggedIn?.let { if (it) "home" else "auth" }
+                            ?: "splash",
+                        modifier = Modifier.padding(innerPadding)
+                    ) {
+                        composable("splash") { }
+                        authNavigation(navController)
+                        homeNavigation(navController)
+                    }
                 }
             }
         }
@@ -215,6 +278,9 @@ private fun NavGraphBuilder.homeNavigation(navController: NavController) {
                 }
             )
         }
+        composable("events") {  }
+        composable("chatbot") {}
+        composable("account") {}
     }
 }
 

@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.compose.compiler)
     id("com.google.devtools.ksp")
+    id("dagger.hilt.android.plugin")
+    id("org.jetbrains.kotlin.plugin.parcelize")
 }
 
 android {
@@ -79,4 +81,15 @@ dependencies {
     //mapbox
     implementation(libs.android)
     implementation(libs.maps.compose)
+    
+    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.ui.text.google.fonts)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+
+    implementation(libs.androidx.core.splashscreen)
+    implementation(libs.otpverification)
+
+    implementation(libs.androidx.material)
+
 }

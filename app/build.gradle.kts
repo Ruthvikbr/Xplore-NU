@@ -91,5 +91,7 @@ dependencies {
     implementation(libs.otpverification)
 
     implementation(libs.androidx.material)
+    implementation(libs.accompanist.permissions)
+
 
 }

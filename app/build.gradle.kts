@@ -79,9 +79,12 @@ dependencies {
     testImplementation(libs.mockk)
 
     //mapbox
-    implementation(libs.android)
+    implementation(libs.mapbox.android) {
+        exclude(group = "com.google.android.gms", module = "play-services-cronet")
+    }
     implementation(libs.maps.compose)
-    
+    implementation(libs.play.services.cronet)
+
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.ui.text.google.fonts)
     implementation(libs.androidx.navigation.compose)

@@ -7,9 +7,7 @@ import android.provider.Settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -19,29 +17,31 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionStatus
-import com.google.accompanist.permissions.rememberPermissionState
-import com.mobile.xplore_nu.ui.components.RedButton
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.mobile.xplore_nu.ui.components.tour.MapComposable
+import com.mobile.xplore_nu.ui.components.tour.PermissionDeniedComposable
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun TourPage(
-    onButtonClicked: () -> Unit
-) {
+fun TourPage() {
 
-    val permissionState = rememberPermissionState(
-        Manifest.permission.ACCESS_FINE_LOCATION,
+    val permissionState = rememberMultiplePermissionsState(
+        permissions = listOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+        )
     )
 
     val context = LocalContext.current
 
-    var hasRequestedPermission by rememberSaveable { mutableStateOf(false) }
+    var hasRequestedPermissions by rememberSaveable { mutableStateOf(false) }
     var permissionRequestCompleted by rememberSaveable { mutableStateOf(false) }
 
-    LaunchedEffect(hasRequestedPermission) {
-        if (hasRequestedPermission) {
-            permissionRequestCompleted = true
+    LaunchedEffect(hasRequestedPermissions) {
+        if (hasRequestedPermissions) {
+            permissionRequestCompleted = permissionState.revokedPermissions.isNotEmpty()
         }
     }
 
@@ -50,44 +50,39 @@ fun TourPage(
         verticalArrangement = Arrangement.Center,
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+            .padding(if (permissionState.allPermissionsGranted) 0.dp else 24.dp)
     ) {
-        when (val status = permissionState.status) {
-            is PermissionStatus.Denied -> {
+        when {
+            permissionState.allPermissionsGranted -> {
+                MapComposable(modifier = Modifier.fillMaxSize())
+            }
+
+            permissionState.shouldShowRationale -> {
+                PermissionDeniedComposable(onButtonClick = {
+                    permissionState.launchMultiplePermissionRequest()
+                    hasRequestedPermissions = true
+                })
+            }
+
+            else -> {
                 if (permissionRequestCompleted) {
-                    if (status.shouldShowRationale) {
-                        Text("Location permission is required to access this feature")
-                        RedButton(label = "Enable Location Permission", onClick = {
-                            permissionState.launchPermissionRequest()
-                            hasRequestedPermission = true
-                        })
-                    } else {
-                        Text("Location permission denied. Please enable it in the settings to proceed")
-                        RedButton(label = "Enable Location Permission", onClick = {
+                    PermissionDeniedComposable(
+                        onButtonClick = {
                             val intent =
                                 Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
                                     data = Uri.fromParts("package", context.packageName, null)
                                 }
                             context.startActivity(intent)
-                        })
-                    }
+                        },
+                        messageText = "Location permission denied. Please enable it in the settings to proceed"
+                    )
                 } else {
-                    Text("Location permission is required to access this feature")
-                    RedButton(label = "Enable Location Permission", onClick = {
-                        permissionState.launchPermissionRequest()
-                        hasRequestedPermission = true
+                    PermissionDeniedComposable(onButtonClick = {
+                        permissionState.launchMultiplePermissionRequest()
+                        hasRequestedPermissions = true
                     })
                 }
             }
-
-            PermissionStatus.Granted -> {
-                MapComposable()
-            }
         }
     }
-}
-
-@Composable
-fun MapComposable() {
-    Text("Home screen")
 }

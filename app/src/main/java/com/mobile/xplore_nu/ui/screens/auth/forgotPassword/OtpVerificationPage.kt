@@ -29,10 +29,10 @@ import com.mobile.domain.models.ResendOtpResponse
 import com.mobile.domain.models.VerifyOtpResponse
 import com.mobile.domain.utils.Resource
 import com.mobile.domain.utils.Status
-import com.mobile.xplore_nu.ui.components.AppNameHeader
-import com.mobile.xplore_nu.ui.components.HuskyLogoImage
-import com.mobile.xplore_nu.ui.components.LeftChevron
-import com.mobile.xplore_nu.ui.components.RedButton
+import com.mobile.xplore_nu.ui.components.common.AppNameHeader
+import com.mobile.xplore_nu.ui.components.common.HuskyLogoImage
+import com.mobile.xplore_nu.ui.components.common.LeftChevron
+import com.mobile.xplore_nu.ui.components.common.RedButton
 import com.mobile.xplore_nu.ui.theme.fontFamily
 import com.mobile.xplore_nu.ui.uistates.OtpState
 

@@ -83,7 +83,9 @@ dependencies {
         exclude(group = "com.google.android.gms", module = "play-services-cronet")
     }
     implementation(libs.maps.compose)
-    implementation(libs.play.services.cronet)
+//    implementation(libs.play.services.cronet)
+    implementation(libs.play.services.location)
+    implementation(libs.kotlin.coroutines.play)
 
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.ui.text.google.fonts)

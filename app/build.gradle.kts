@@ -92,4 +92,6 @@ dependencies {
 
     implementation(libs.androidx.material)
 
+    implementation(libs.compose)
+
 }

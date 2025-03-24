@@ -17,6 +17,7 @@ import com.mobile.data.local.mappers.toLogoutResponse
 import com.mobile.data.local.mappers.toRequestOtpResponse
 import com.mobile.data.local.mappers.toResendOtpResponse
 import com.mobile.data.local.mappers.toResetPasswordResponse
+import com.mobile.data.local.mappers.toUpcomingEventResponse
 import com.mobile.data.local.mappers.toUser
 import com.mobile.data.local.mappers.toVerifyOtpResponse
 import com.mobile.data.local.models.DUser
@@ -31,6 +32,7 @@ import com.mobile.domain.models.ResendOtpRequest
 import com.mobile.domain.models.ResendOtpResponse
 import com.mobile.domain.models.ResetPasswordRequest
 import com.mobile.domain.models.ResetPasswordResponse
+import com.mobile.domain.models.UpcomingEventResponse
 import com.mobile.domain.models.User
 import com.mobile.domain.models.UserRegisterBody
 import com.mobile.domain.models.VerifyOtpRequest
@@ -38,6 +40,7 @@ import com.mobile.domain.models.VerifyOtpResponse
 import com.mobile.domain.repository.UserRepository
 import com.mobile.domain.utils.Resource
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import org.json.JSONObject
 import javax.inject.Inject
@@ -267,6 +270,29 @@ class UserRepositoryImpl @Inject constructor(
                 }
             }
         } catch (e: Exception) {
+            return Resource.error("Something went Wrong", null)
+        }
+        return Resource.error("Something went Wrong", null)
+    }
+
+    override suspend fun getUpcomingEvents(): Resource<UpcomingEventResponse> {
+        try {
+            val response = authToken.first()?.let { userService.getUpcomingEvents(it) }
+            if (response!=null && response.isSuccessful && response.body()!=null) {
+                val data: UpcomingEventResponse = response.body()!!.toUpcomingEventResponse()
+                return Resource.success(data)
+            } else {
+                try {
+                    response?.errorBody()?.string()?.let { errorBody ->
+                        val jsonObject = JSONObject(errorBody)
+                        val message = jsonObject.getString("message")
+                        return Resource.error(message, null)
+                    }
+                } catch (ex: Exception) {
+                    return Resource.error("Something went wrong", null)
+                }
+            }
+        }  catch (e: Exception) {
             return Resource.error("Something went Wrong", null)
         }
         return Resource.error("Something went Wrong", null)

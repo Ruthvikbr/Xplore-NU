@@ -272,12 +272,12 @@ private fun NavGraphBuilder.homeNavigation(navController: NavController) {
         composable("tour") {
             val viewModel = it.sharedViewModel<TourViewModel>(navController)
             TourPage(
-                onButtonClicked = {
-                    viewModel.logoutUser()
-                    navController.navigate("auth") {
-                        popUpTo("login") { inclusive = true }
-                    }
-                }
+//                onButtonClicked = {
+//                    viewModel.logoutUser()
+//                    navController.navigate("auth") {
+//                        popUpTo("login") { inclusive = true }
+//                    }
+//                }
             )
         }
         composable("events") {

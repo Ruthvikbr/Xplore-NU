@@ -43,6 +43,8 @@ import com.mobile.xplore_nu.ui.screens.auth.login.LoginPage
 import com.mobile.xplore_nu.ui.screens.auth.login.LoginViewModel
 import com.mobile.xplore_nu.ui.screens.auth.register.RegisterViewModel
 import com.mobile.xplore_nu.ui.screens.auth.register.RegistrationPage
+import com.mobile.xplore_nu.ui.screens.event.EventViewModel
+import com.mobile.xplore_nu.ui.screens.event.EventsPage
 import com.mobile.xplore_nu.ui.screens.tour.TopLevelRoute
 import com.mobile.xplore_nu.ui.screens.tour.TourPage
 import com.mobile.xplore_nu.ui.screens.tour.TourViewModel
@@ -278,7 +280,11 @@ private fun NavGraphBuilder.homeNavigation(navController: NavController) {
 //                }
             )
         }
-        composable("events") {  }
+        composable("events") {
+            val eventViewModel: EventViewModel = hiltViewModel()
+            val events by eventViewModel.events.collectAsState()
+            EventsPage(events)
+        }
         composable("chatbot") {}
         composable("account") {}
     }

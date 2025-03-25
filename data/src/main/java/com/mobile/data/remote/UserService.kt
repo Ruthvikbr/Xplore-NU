@@ -9,6 +9,7 @@ import com.mobile.data.remote.models.DResendOtpRequest
 import com.mobile.data.remote.models.DResendOtpResponse
 import com.mobile.data.remote.models.DResetPasswordRequest
 import com.mobile.data.remote.models.DResetPasswordResponse
+import com.mobile.data.remote.models.DUpcomingEventsResponse
 import com.mobile.data.remote.models.DUserRegisterBody
 import com.mobile.data.remote.models.DUserResponse
 import com.mobile.data.remote.models.DVerifyOtpRequest
@@ -16,6 +17,7 @@ import com.mobile.data.remote.models.DVerifyOtpResponse
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Header
 import retrofit2.http.POST
 
 interface UserService {
@@ -44,5 +46,7 @@ interface UserService {
     @POST("auth/reset_password")
     suspend fun resetPassword(@Body dResetPasswordRequest: DResetPasswordRequest): Response<DResetPasswordResponse>
 
+    @GET("event/upcoming")
+    suspend fun getUpcomingEvents(@Header("authorization") token: String): Response<DUpcomingEventsResponse>
 
 }

@@ -9,6 +9,7 @@ import com.mobile.domain.models.ResendOtpRequest
 import com.mobile.domain.models.ResendOtpResponse
 import com.mobile.domain.models.ResetPasswordRequest
 import com.mobile.domain.models.ResetPasswordResponse
+import com.mobile.domain.models.UpcomingEventResponse
 import com.mobile.domain.models.User
 import com.mobile.domain.models.UserRegisterBody
 import com.mobile.domain.models.VerifyOtpRequest
@@ -47,5 +48,7 @@ interface UserRepository {
     suspend fun resendOtp(resendOtpRequest: ResendOtpRequest): Resource<ResendOtpResponse>
 
     suspend fun resetPassword(resetPasswordRequest: ResetPasswordRequest): Resource<ResetPasswordResponse>
+
+    suspend fun getUpcomingEvents(): Resource<UpcomingEventResponse>
 
 }

@@ -18,14 +18,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.mobile.domain.models.Event
 import com.mobile.xplore_nu.ui.components.EventCard
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
 import java.util.Date
 
 @Composable
 fun EventsPage(
-    events: List<Event>?
+    events: List<Event>?,
+    navController: NavController
 ) {
     LaunchedEffect(events) {
         Log.d("EVENTS", events?.toString() ?: "No Events")
@@ -45,11 +49,15 @@ fun EventsPage(
                 )
             }
             items(events) {
+                val encodedImageUrls = it.images?.joinToString(",") { url ->
+                    URLEncoder.encode(url, StandardCharsets.UTF_8.toString())
+                } ?: ""
                 EventCard(
                     imageUrl = it.images?.firstOrNull(),
                     eventName = it.name,
                     date = it.date.toFormattedString(),
-                    location = it.location
+                    location = it.location,
+                    onCardClicked = {navController.navigate("details/${encodedImageUrls}/${it.name}/${it.date.toFormattedString()}/${it.location}/${it.description}")}
                 )
             }
         }

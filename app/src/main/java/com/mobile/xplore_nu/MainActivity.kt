@@ -34,6 +34,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
+import com.mobile.domain.models.Event
 import com.mobile.xplore_nu.ui.screens.auth.forgotPassword.ForgotPasswordPage
 import com.mobile.xplore_nu.ui.screens.auth.forgotPassword.ForgotPasswordViewModel
 import com.mobile.xplore_nu.ui.screens.auth.forgotPassword.OtpVerificationPage
@@ -43,6 +44,7 @@ import com.mobile.xplore_nu.ui.screens.auth.login.LoginPage
 import com.mobile.xplore_nu.ui.screens.auth.login.LoginViewModel
 import com.mobile.xplore_nu.ui.screens.auth.register.RegisterViewModel
 import com.mobile.xplore_nu.ui.screens.auth.register.RegistrationPage
+import com.mobile.xplore_nu.ui.screens.event.EventDetailsPage
 import com.mobile.xplore_nu.ui.screens.event.EventViewModel
 import com.mobile.xplore_nu.ui.screens.event.EventsPage
 import com.mobile.xplore_nu.ui.screens.tour.TopLevelRoute
@@ -70,7 +72,7 @@ class MainActivity : ComponentActivity() {
                 val topLevelRouteNames = listOf("tour", "events", "chatbot", "account")
                 val topLevelRoutes = listOf(
                     TopLevelRoute("Home", "tour", Icons.Default.Home),
-                    TopLevelRoute("Events", "events", ImageVector.vectorResource(id = R.drawable.calendar_icon)),
+                    TopLevelRoute("Events", "event", ImageVector.vectorResource(id = R.drawable.calendar_icon)),
                     TopLevelRoute("Chatbot", "chatbot", ImageVector.vectorResource(id = R.drawable.chatbot_icon)),
                     TopLevelRoute("Account", "account", Icons.Default.Person)
                 )
@@ -122,6 +124,7 @@ class MainActivity : ComponentActivity() {
                         composable("splash") { }
                         authNavigation(navController)
                         homeNavigation(navController)
+                        eventNavigation(navController)
                     }
                 }
             }
@@ -280,13 +283,39 @@ private fun NavGraphBuilder.homeNavigation(navController: NavController) {
 //                }
             )
         }
+//        composable("events") {
+//            val eventViewModel: EventViewModel = hiltViewModel()
+//            val events by eventViewModel.events.collectAsState()
+//            EventsPage(events)
+//        }
+        composable("chatbot") {}
+        composable("account") {}
+    }
+}
+
+private fun NavGraphBuilder.eventNavigation(navController: NavController) {
+    navigation(startDestination = "events", route="event") {
         composable("events") {
             val eventViewModel: EventViewModel = hiltViewModel()
             val events by eventViewModel.events.collectAsState()
-            EventsPage(events)
+            EventsPage(events, navController)
         }
-        composable("chatbot") {}
-        composable("account") {}
+        composable("details/{eventImages}/{eventName}/{eventDate}/{eventLocation}/{eventDescription}") { navBackStackEntry ->
+            val encodedEventImageURLs = navBackStackEntry.arguments?.getString("eventImages")
+            val eventImages = Uri.decode(encodedEventImageURLs).split(",").filter { it.isNotEmpty() }
+            val eventName = navBackStackEntry.arguments?.getString("eventName")
+            val eventDate = navBackStackEntry.arguments?.getString("eventDate")
+            val eventLocation = navBackStackEntry.arguments?.getString("eventLocation")
+            val eventDescription = navBackStackEntry.arguments?.getString("eventDescription")
+
+            EventDetailsPage(
+                eventImages = eventImages,
+                eventName = eventName,
+                eventDate = eventDate ,
+                eventLocation = eventLocation,
+                eventDescription = eventDescription
+            )
+        }
     }
 }
 

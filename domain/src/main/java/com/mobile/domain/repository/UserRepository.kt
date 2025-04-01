@@ -22,7 +22,7 @@ interface UserRepository {
 
     suspend fun insertUser(user: User)
 
-    fun getUser(id: String): User?
+    fun getUser(): User?
 
     suspend fun loginUser(loginRequest: LoginRequest): Resource<AuthenticationResponse>
 

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
@@ -154,7 +155,10 @@ fun LoginPage(
             label = "Login",
             onClick = { onLoginButtonClicked(loginState) },
             enabled = loginState.canLogin,
-            isLoading = loginState.isLoading
+            isLoading = loginState.isLoading,
+            modifier = Modifier
+                .width(300.dp)
+                .height(54.dp)
         )
         Column {
             Text(

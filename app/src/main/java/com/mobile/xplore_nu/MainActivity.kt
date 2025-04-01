@@ -34,7 +34,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
-import com.mobile.domain.models.Event
 import com.mobile.xplore_nu.ui.screens.auth.forgotPassword.ForgotPasswordPage
 import com.mobile.xplore_nu.ui.screens.auth.forgotPassword.ForgotPasswordViewModel
 import com.mobile.xplore_nu.ui.screens.auth.forgotPassword.OtpVerificationPage
@@ -274,20 +273,12 @@ private fun NavGraphBuilder.homeNavigation(navController: NavController) {
     navigation(startDestination = "tour", route = "home") {
         composable("tour") {
             val viewModel = it.sharedViewModel<TourViewModel>(navController)
+            val points by viewModel.points.collectAsState()
             TourPage(
-//                onButtonClicked = {
-//                    viewModel.logoutUser()
-//                    navController.navigate("auth") {
-//                        popUpTo("login") { inclusive = true }
-//                    }
-//                }
+                fetchPoints = viewModel::getPoints,
+                points ?: emptyList()
             )
         }
-//        composable("events") {
-//            val eventViewModel: EventViewModel = hiltViewModel()
-//            val events by eventViewModel.events.collectAsState()
-//            EventsPage(events)
-//        }
         composable("chatbot") {}
         composable("account") {}
     }

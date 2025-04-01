@@ -4,8 +4,8 @@ import com.mobile.data.remote.models.DAuthenticationResponse
 import com.mobile.domain.models.AuthenticationResponse
 
 fun DAuthenticationResponse.toAuthenticationResponse() = AuthenticationResponse(
-    message, token, dUser.toUser()
+    message, token, refreshToken, dUser.toUser()
 )
 
 fun AuthenticationResponse.toDAuthenticationResponse() =
-    DAuthenticationResponse(message, token, user.toDUser())
+    DAuthenticationResponse(message, token, user.toDUser(), refreshToken)

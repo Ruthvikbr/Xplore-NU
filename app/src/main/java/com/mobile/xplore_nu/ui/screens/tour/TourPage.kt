@@ -20,12 +20,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.mobile.domain.models.PointOfInterest
 import com.mobile.xplore_nu.ui.components.tour.MapComposable
 import com.mobile.xplore_nu.ui.components.tour.PermissionDeniedComposable
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun TourPage() {
+fun TourPage(fetchPoints: () -> Unit,  points: List<PointOfInterest>) {
 
     val permissionState = rememberMultiplePermissionsState(
         permissions = listOf(
@@ -54,7 +55,7 @@ fun TourPage() {
     ) {
         when {
             permissionState.allPermissionsGranted -> {
-                MapComposable(modifier = Modifier.fillMaxSize())
+                MapComposable(modifier = Modifier.fillMaxSize(), fetchPoints, points)
             }
 
             permissionState.shouldShowRationale -> {

@@ -8,8 +8,10 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class DAuthenticationResponse(
     val message: String,
+    @SerializedName(value = "accessToken")
     val token: String,
     @SerializedName("user")
-    val dUser: DUser
+    val dUser: DUser,
+    val refreshToken: String,
 ) : Parcelable
 

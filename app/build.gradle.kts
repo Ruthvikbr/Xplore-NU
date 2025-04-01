@@ -83,7 +83,6 @@ dependencies {
         exclude(group = "com.google.android.gms", module = "play-services-cronet")
     }
     implementation(libs.maps.compose)
-//    implementation(libs.play.services.cronet)
     implementation(libs.play.services.location)
     implementation(libs.kotlin.coroutines.play)
 
@@ -97,7 +96,6 @@ dependencies {
 
     implementation(libs.androidx.material)
     implementation(libs.accompanist.permissions)
-
 
     implementation(libs.compose)
 

@@ -1,6 +1,7 @@
 package com.mobile.domain.repository
 
 import com.mobile.domain.models.AuthenticationResponse
+import com.mobile.domain.models.FetchPoiResponse
 import com.mobile.domain.models.LoginRequest
 import com.mobile.domain.models.LogoutResponse
 import com.mobile.domain.models.RequestOtpRequest
@@ -39,7 +40,7 @@ interface UserRepository {
 
     val authToken: Flow<String?>
 
-    suspend fun saveAuthToken(token: String)
+    suspend fun saveAuthTokens(token: String, refreshToken: String )
 
     suspend fun requestOtp(requestOtpRequest: RequestOtpRequest): Resource<RequestOtpResponse>
 
@@ -50,5 +51,7 @@ interface UserRepository {
     suspend fun resetPassword(resetPasswordRequest: ResetPasswordRequest): Resource<ResetPasswordResponse>
 
     suspend fun getUpcomingEvents(): Resource<UpcomingEventResponse>
+
+    suspend fun getPointOfInterestMarkers(): Resource<FetchPoiResponse>
 
 }

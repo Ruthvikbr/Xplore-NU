@@ -31,7 +31,7 @@ class AuthInterceptor @Inject constructor(
         var response = chain.proceed(originalRequest)
         val userService = userServiceProvider.get()
 
-        if (response.code == 401 && response.message == "Invalid token") {
+        if (response.code == 403 && response.message == "Invalid token") {
             try {
 
                 runBlocking {

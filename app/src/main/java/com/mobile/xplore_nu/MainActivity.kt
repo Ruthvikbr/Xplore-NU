@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,6 +35,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
+import com.mobile.domain.models.User
 import com.mobile.xplore_nu.ui.screens.auth.forgotPassword.ForgotPasswordPage
 import com.mobile.xplore_nu.ui.screens.auth.forgotPassword.ForgotPasswordViewModel
 import com.mobile.xplore_nu.ui.screens.auth.forgotPassword.OtpVerificationPage
@@ -43,11 +45,17 @@ import com.mobile.xplore_nu.ui.screens.auth.login.LoginPage
 import com.mobile.xplore_nu.ui.screens.auth.login.LoginViewModel
 import com.mobile.xplore_nu.ui.screens.auth.register.RegisterViewModel
 import com.mobile.xplore_nu.ui.screens.auth.register.RegistrationPage
+import com.mobile.xplore_nu.ui.screens.event.EventDetailsPage
+import com.mobile.xplore_nu.ui.screens.event.EventViewModel
+import com.mobile.xplore_nu.ui.screens.event.EventsPage
+import com.mobile.xplore_nu.ui.screens.profile.ProfileScreen
+import com.mobile.xplore_nu.ui.screens.profile.ProfileViewModel
 import com.mobile.xplore_nu.ui.screens.tour.TopLevelRoute
 import com.mobile.xplore_nu.ui.screens.tour.TourPage
 import com.mobile.xplore_nu.ui.screens.tour.TourViewModel
 import com.mobile.xplore_nu.ui.theme.XploreNUTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.coroutineScope
 import java.nio.charset.StandardCharsets
 
 @AndroidEntryPoint
@@ -68,7 +76,7 @@ class MainActivity : ComponentActivity() {
                 val topLevelRouteNames = listOf("tour", "events", "chatbot", "account")
                 val topLevelRoutes = listOf(
                     TopLevelRoute("Home", "tour", Icons.Default.Home),
-                    TopLevelRoute("Events", "events", ImageVector.vectorResource(id = R.drawable.calendar_icon)),
+                    TopLevelRoute("Events", "event", ImageVector.vectorResource(id = R.drawable.calendar_icon)),
                     TopLevelRoute("Chatbot", "chatbot", ImageVector.vectorResource(id = R.drawable.chatbot_icon)),
                     TopLevelRoute("Account", "account", Icons.Default.Person)
                 )
@@ -120,6 +128,7 @@ class MainActivity : ComponentActivity() {
                         composable("splash") { }
                         authNavigation(navController)
                         homeNavigation(navController)
+                        eventNavigation(navController)
                     }
                 }
             }
@@ -269,18 +278,51 @@ private fun NavGraphBuilder.homeNavigation(navController: NavController) {
     navigation(startDestination = "tour", route = "home") {
         composable("tour") {
             val viewModel = it.sharedViewModel<TourViewModel>(navController)
+            val points by viewModel.points.collectAsState()
             TourPage(
-                onButtonClicked = {
-                    viewModel.logoutUser()
-                    navController.navigate("auth") {
-                        popUpTo("login") { inclusive = true }
-                    }
-                }
+                fetchPoints = viewModel::getPoints,
+                points ?: emptyList()
             )
         }
-        composable("events") {  }
         composable("chatbot") {}
-        composable("account") {}
+        composable("account") {
+            val profileViewModel: ProfileViewModel = hiltViewModel()
+            val user by produceState<User?>(initialValue = null) {
+                value = profileViewModel.getUser()
+            }
+            ProfileScreen(userName = (user?.firstName + " " + user?.lastName), userEmail = user?.email) {
+                profileViewModel.logout()
+                navController.navigate("login") {
+                    popUpTo("auth") { inclusive = true }
+                }
+            }
+        }
+    }
+}
+
+private fun NavGraphBuilder.eventNavigation(navController: NavController) {
+    navigation(startDestination = "events", route="event") {
+        composable("events") {
+            val eventViewModel: EventViewModel = hiltViewModel()
+            val events by eventViewModel.events.collectAsState()
+            EventsPage(events, navController)
+        }
+        composable("details/{eventImages}/{eventName}/{eventDate}/{eventLocation}/{eventDescription}") { navBackStackEntry ->
+            val encodedEventImageURLs = navBackStackEntry.arguments?.getString("eventImages")
+            val eventImages = Uri.decode(encodedEventImageURLs).split(",").filter { it.isNotEmpty() }
+            val eventName = navBackStackEntry.arguments?.getString("eventName")
+            val eventDate = navBackStackEntry.arguments?.getString("eventDate")
+            val eventLocation = navBackStackEntry.arguments?.getString("eventLocation")
+            val eventDescription = navBackStackEntry.arguments?.getString("eventDescription")
+
+            EventDetailsPage(
+                eventImages = eventImages,
+                eventName = eventName,
+                eventDate = eventDate ,
+                eventLocation = eventLocation,
+                eventDescription = eventDescription
+            )
+        }
     }
 }
 

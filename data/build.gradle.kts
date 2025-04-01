@@ -1,10 +1,11 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
     id("com.google.devtools.ksp")
     id("dagger.hilt.android.plugin")
     id("org.jetbrains.kotlin.plugin.parcelize")
-//    id("com.google.protobuf")
 }
 
 android {
@@ -16,9 +17,17 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+
+        val properties = Properties()
+        properties.load(project.rootProject.file("local.properties").reader())
+        val baseUrl: String = properties.getProperty("BASE_URL")
+        buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
     }
 
     buildTypes {
+        debug {
+            isDefault = true
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -35,11 +44,9 @@ android {
         jvmTarget = "17"
     }
 
-//    sourceSets { //This is the correction.
-//        getByName("main") {
-//            kotlin.srcDir("${layout.buildDirectory}/generated/source/proto/main/kotlin")
-//        }
-//    }
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies {
@@ -67,22 +74,4 @@ dependencies {
 
     implementation(libs.logging.interceptor)
     implementation(libs.androidx.datastore.preferences)
-
-//    implementation("androidx.datastore:datastore:1.0.0")
-//    implementation("com.google.protobuf:protobuf-javalite:3.21.2")
-
-
 }
-//
-//protobuf {
-//    protoc {
-//        artifact = "com.google.protobuf:protoc:3.21.2"
-//    }
-//    generateProtoTasks {
-//        all().forEach { task ->
-//            task.plugins.create("java") {
-//                option("lite")
-//            }
-//        }
-//    }
-//}

@@ -13,16 +13,19 @@ import com.mobile.data.local.mappers.toDResendOtpRequest
 import com.mobile.data.local.mappers.toDUser
 import com.mobile.data.local.mappers.toDUserRegisterBody
 import com.mobile.data.local.mappers.toDVerifyOtpRequest
+import com.mobile.data.local.mappers.toFetchPoiResponse
 import com.mobile.data.local.mappers.toLogoutResponse
 import com.mobile.data.local.mappers.toRequestOtpResponse
 import com.mobile.data.local.mappers.toResendOtpResponse
 import com.mobile.data.local.mappers.toResetPasswordResponse
+import com.mobile.data.local.mappers.toUpcomingEventResponse
 import com.mobile.data.local.mappers.toUser
 import com.mobile.data.local.mappers.toVerifyOtpResponse
 import com.mobile.data.local.models.DUser
 import com.mobile.data.local.room.Dao
 import com.mobile.data.remote.UserService
 import com.mobile.domain.models.AuthenticationResponse
+import com.mobile.domain.models.FetchPoiResponse
 import com.mobile.domain.models.LoginRequest
 import com.mobile.domain.models.LogoutResponse
 import com.mobile.domain.models.RequestOtpRequest
@@ -31,6 +34,7 @@ import com.mobile.domain.models.ResendOtpRequest
 import com.mobile.domain.models.ResendOtpResponse
 import com.mobile.domain.models.ResetPasswordRequest
 import com.mobile.domain.models.ResetPasswordResponse
+import com.mobile.domain.models.UpcomingEventResponse
 import com.mobile.domain.models.User
 import com.mobile.domain.models.UserRegisterBody
 import com.mobile.domain.models.VerifyOtpRequest
@@ -38,6 +42,7 @@ import com.mobile.domain.models.VerifyOtpResponse
 import com.mobile.domain.repository.UserRepository
 import com.mobile.domain.utils.Resource
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import org.json.JSONObject
 import javax.inject.Inject
@@ -49,14 +54,15 @@ class UserRepositoryImpl @Inject constructor(
 ) : UserRepository {
 
     private val AUTH_TOKEN_KEY = stringPreferencesKey("auth_token")
+    private val REFRESH_TOKEN_KEY = stringPreferencesKey("refresh_token")
     private val IS_LOGGED_IN_KEY = booleanPreferencesKey("is_logged_in")
 
     override suspend fun insertUser(user: User) {
         dao.insertUser(user.toDUser())
     }
 
-    override fun getUser(id: String): User? {
-        return dao.getUser(id)?.toUser()
+    override fun getUser(): User? {
+        return dao.getUser()?.toUser()
     }
 
     override suspend fun loginUser(loginRequest: LoginRequest): Resource<AuthenticationResponse> {
@@ -64,7 +70,7 @@ class UserRepositoryImpl @Inject constructor(
             val response = userService.loginUser(loginRequest.toDLoginRequest())
             return if (response.isSuccessful && response.body() != null) {
                 val data: AuthenticationResponse = response.body()!!.toAuthenticationResponse()
-                saveAuthToken(data.token)
+                saveAuthTokens(data.token, data.refreshToken)
                 setIsLoggedIn(true)
 
                 val user = DUser(
@@ -90,7 +96,7 @@ class UserRepositoryImpl @Inject constructor(
             if (response.isSuccessful && response.body() != null) {
                 val data: AuthenticationResponse = response.body()!!.toAuthenticationResponse()
 
-                saveAuthToken(data.token)
+                saveAuthTokens(data.token, data.refreshToken)
                 //setIsLoggedIn(true)
 
                 val user = DUser(
@@ -147,9 +153,10 @@ class UserRepositoryImpl @Inject constructor(
     }
 
 
-    override suspend fun saveAuthToken(token: String) {
+    override suspend fun saveAuthTokens(token: String, refreshToken: String) {
         dataStore.edit { preferences ->
             preferences[AUTH_TOKEN_KEY] = token
+            preferences[REFRESH_TOKEN_KEY] = refreshToken
         }
     }
 
@@ -160,6 +167,7 @@ class UserRepositoryImpl @Inject constructor(
     override suspend fun clearAuthToken() {
         dataStore.edit { preferences ->
             preferences.remove(AUTH_TOKEN_KEY)
+            preferences.remove(REFRESH_TOKEN_KEY)
         }
     }
 
@@ -267,6 +275,53 @@ class UserRepositoryImpl @Inject constructor(
                 }
             }
         } catch (e: Exception) {
+            return Resource.error("Something went Wrong", null)
+        }
+        return Resource.error("Something went Wrong", null)
+    }
+
+    override suspend fun getUpcomingEvents(): Resource<UpcomingEventResponse> {
+        try {
+            val response = authToken.first()?.let { userService.getUpcomingEvents(it) }
+            if (response!=null && response.isSuccessful && response.body()!=null) {
+                val data: UpcomingEventResponse = response.body()!!.toUpcomingEventResponse()
+                return Resource.success(data)
+            } else {
+                try {
+                    response?.errorBody()?.string()?.let { errorBody ->
+                        val jsonObject = JSONObject(errorBody)
+                        val message = jsonObject.getString("message")
+                        return Resource.error(message, null)
+                    }
+                } catch (ex: Exception) {
+                    return Resource.error("Something went wrong", null)
+                }
+            }
+        }  catch (e: Exception) {
+            return Resource.error("Something went Wrong", null)
+        }
+        return Resource.error("Something went Wrong", null)
+    }
+
+    override suspend fun getPointOfInterestMarkers(): Resource<FetchPoiResponse>
+    {
+        try {
+            val response = authToken.first()?.let { userService.getPointOfInterestMarkers(it) }
+            if (response!=null && response.isSuccessful && response.body()!=null) {
+                val data: FetchPoiResponse = response.body()!!.toFetchPoiResponse()
+                return Resource.success(data)
+            } else {
+                try {
+                    response?.errorBody()?.string()?.let { errorBody ->
+                        val jsonObject = JSONObject(errorBody)
+                        val message = jsonObject.getString("message")
+                        return Resource.error(message, null)
+                    }
+                } catch (ex: Exception) {
+                    return Resource.error("Something went wrong", null)
+                }
+            }
+        }  catch (e: Exception) {
             return Resource.error("Something went Wrong", null)
         }
         return Resource.error("Something went Wrong", null)

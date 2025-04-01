@@ -14,7 +14,7 @@ class DataStoreUseCase @Inject constructor(
 
     suspend fun clearIsLoggedIn() = repository.clearAuthToken()
 
-    suspend fun setAuthToken(token: String) = repository.saveAuthToken(token)
+    suspend fun setAuthToken(token: String, refreshToken: String) = repository.saveAuthTokens(token, refreshToken)
 
     suspend fun setIsLoggedIn(value: Boolean) = repository.setIsLoggedIn(value)
 }

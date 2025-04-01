@@ -12,6 +12,6 @@ interface Dao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertUser(user: DUser)
 
-    @Query("SELECT * FROM DUser WHERE id=:id")
-    fun getUser(id: String): DUser?
+    @Query("SELECT * FROM DUser LIMIT 1")
+    fun getUser(): DUser?
 }

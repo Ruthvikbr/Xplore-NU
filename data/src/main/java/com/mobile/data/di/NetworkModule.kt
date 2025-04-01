@@ -1,5 +1,6 @@
 package com.mobile.data.di
 
+import com.mobile.data.BuildConfig
 import com.mobile.data.remote.UserService
 import dagger.Module
 import dagger.Provides
@@ -15,7 +16,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    private const val BASE_URL ="http://10.0.0.108:3000/"
+    private const val BASE_URL = BuildConfig.BASE_URL
 
     @Provides
     @Singleton
@@ -27,7 +28,9 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(loggingInterceptor: HttpLoggingInterceptor): OkHttpClient {
+    fun provideOkHttpClient(
+        loggingInterceptor: HttpLoggingInterceptor,
+    ): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
             .build()

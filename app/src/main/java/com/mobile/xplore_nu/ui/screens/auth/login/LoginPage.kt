@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
@@ -34,10 +35,10 @@ import androidx.compose.ui.unit.sp
 import com.mobile.domain.models.AuthenticationResponse
 import com.mobile.domain.utils.Resource
 import com.mobile.domain.utils.Status
-import com.mobile.xplore_nu.ui.components.AppNameHeader
-import com.mobile.xplore_nu.ui.components.HuskyLogoImage
-import com.mobile.xplore_nu.ui.components.OutlinedTextFieldComponent
-import com.mobile.xplore_nu.ui.components.RedButton
+import com.mobile.xplore_nu.ui.components.common.AppNameHeader
+import com.mobile.xplore_nu.ui.components.common.HuskyLogoImage
+import com.mobile.xplore_nu.ui.components.common.OutlinedTextFieldComponent
+import com.mobile.xplore_nu.ui.components.common.RedButton
 import com.mobile.xplore_nu.ui.theme.fontFamily
 import com.mobile.xplore_nu.ui.uistates.LoginState
 
@@ -154,7 +155,10 @@ fun LoginPage(
             label = "Login",
             onClick = { onLoginButtonClicked(loginState) },
             enabled = loginState.canLogin,
-            isLoading = loginState.isLoading
+            isLoading = loginState.isLoading,
+            modifier = Modifier
+                .width(300.dp)
+                .height(54.dp)
         )
         Column {
             Text(

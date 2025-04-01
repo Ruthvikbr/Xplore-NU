@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,6 +35,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
+import com.mobile.domain.models.User
 import com.mobile.xplore_nu.ui.screens.auth.forgotPassword.ForgotPasswordPage
 import com.mobile.xplore_nu.ui.screens.auth.forgotPassword.ForgotPasswordViewModel
 import com.mobile.xplore_nu.ui.screens.auth.forgotPassword.OtpVerificationPage
@@ -46,11 +48,14 @@ import com.mobile.xplore_nu.ui.screens.auth.register.RegistrationPage
 import com.mobile.xplore_nu.ui.screens.event.EventDetailsPage
 import com.mobile.xplore_nu.ui.screens.event.EventViewModel
 import com.mobile.xplore_nu.ui.screens.event.EventsPage
+import com.mobile.xplore_nu.ui.screens.profile.ProfileScreen
+import com.mobile.xplore_nu.ui.screens.profile.ProfileViewModel
 import com.mobile.xplore_nu.ui.screens.tour.TopLevelRoute
 import com.mobile.xplore_nu.ui.screens.tour.TourPage
 import com.mobile.xplore_nu.ui.screens.tour.TourViewModel
 import com.mobile.xplore_nu.ui.theme.XploreNUTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.coroutineScope
 import java.nio.charset.StandardCharsets
 
 @AndroidEntryPoint
@@ -280,7 +285,18 @@ private fun NavGraphBuilder.homeNavigation(navController: NavController) {
             )
         }
         composable("chatbot") {}
-        composable("account") {}
+        composable("account") {
+            val profileViewModel: ProfileViewModel = hiltViewModel()
+            val user by produceState<User?>(initialValue = null) {
+                value = profileViewModel.getUser()
+            }
+            ProfileScreen(userName = (user?.firstName + " " + user?.lastName), userEmail = user?.email) {
+                profileViewModel.logout()
+                navController.navigate("login") {
+                    popUpTo("auth") { inclusive = true }
+                }
+            }
+        }
     }
 }
 

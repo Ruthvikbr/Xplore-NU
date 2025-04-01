@@ -56,7 +56,14 @@ jobs:
           distribution: 'temurin'
           java-version: 17
           cache: 'gradle'
-
+          
+      - name: Create local.properties with BASE_URL from secret
+        run: |
+          echo "Creating local.properties file with BASE_URL from secret..."
+          echo "BASE_URL=${{ secrets.BASE_URL }}" > local.properties
+          echo "local.properties created with BASE_URL:"
+          cat local.properties
+          
       - name: Cache Gradle dependencies
         uses: actions/cache@v3
         with:

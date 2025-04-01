@@ -2,8 +2,7 @@
 
 [![Build Status](https://app.travis-ci.com/melaasar/cs130-template.svg?branch=master)](https://app.travis-ci.com/github/melaasar/cs130-template)
 [![Release](https://img.shields.io/github/v/release/melaasar/cs130-template?label=release)](https://github.com/melaasar/cs130-template/releases/latest)
-[![Unit Testing workflow](https://github.com/Ruthvikbr/Xplore-NU/actions/workflows/unit_testing.yml/badge.svg?branch=dev)](https://github.com/Ruthvikbr/Xplore-NU/actions/workflows/unit_testing.yml)
-[![Internal Testing Deployment workflow](https://github.com/Ruthvikbr/Xplore-NU/actions/workflows/internal_testing.yml/badge.svg?branch=qa)](https://github.com/Ruthvikbr/Xplore-NU/actions/workflows/internal_testing.yml)
+[![Internal Testing & Deployment workflow](https://github.com/Ruthvikbr/Xplore-NU/actions/workflows/internal_testing.yml/badge.svg?branch=qa)](https://github.com/Ruthvikbr/Xplore-NU/actions/workflows/internal_testing.yml)
 
 ## Issues
 

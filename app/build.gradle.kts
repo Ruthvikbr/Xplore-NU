@@ -55,6 +55,8 @@ android {
 
 dependencies {
 
+    implementation("androidx.test.ext:junit:1.1.5") // ADDED, BEFORE other dependencies
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -65,13 +67,20 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(project(":data"))
     implementation(project(":domain"))
+    implementation(libs.androidx.ui.test.junit4.android)
     testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
+
+    androidTestImplementation(libs.androidx.junit) // Uses libs object, correct version
+    androidTestImplementation(libs.androidx.espresso.core) // Uses libs object, correct version
+
+    // Compose UI test dependencies (consolidated)
+    androidTestImplementation(libs.androidx.ui.test.junit4) // Uses libs object
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    androidTestImplementation(platform(libs.androidx.compose.bom)) // Keep this
+    debugImplementation(libs.androidx.ui.tooling) // Keep this
+    debugImplementation(libs.androidx.ui.test.manifest) // Keep this
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
@@ -98,5 +107,9 @@ dependencies {
     implementation(libs.accompanist.permissions)
 
     implementation(libs.compose)
+
+    debugImplementation(libs.ui.tooling) // Keep this
+    debugImplementation(libs.ui.test.manifest) // Keep this
+    androidTestImplementation(libs.androidx.navigation.testing)
 
 }

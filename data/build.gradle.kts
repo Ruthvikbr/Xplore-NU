@@ -22,6 +22,9 @@ android {
         properties.load(project.rootProject.file("local.properties").reader())
         val baseUrl: String = properties.getProperty("BASE_URL")
         buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
+
+        val geminiApiKey: String = properties.getProperty("API_KEY")
+        buildConfigField("String", "API_KEY", "\"$baseUrl\"")
     }
 
     buildTypes {

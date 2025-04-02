@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobile.domain.models.PointOfInterest
 import com.mobile.domain.usecases.FetchPointsOfInterestUseCase
+import com.mobile.xplore_nu.ui.uistates.TourUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,11 +22,18 @@ class TourViewModel @Inject constructor(
     private val _points = MutableStateFlow<List<PointOfInterest>?>(null)
     val points: StateFlow<List<PointOfInterest>?> = _points.asStateFlow()
 
+    private val _uiState = MutableStateFlow<TourUiState>(TourUiState.StartTour)
+    val uiState = _uiState.asStateFlow()
+
     fun getPoints() {
         viewModelScope.launch(Dispatchers.IO) {
             val points = fetchPointsOfInterestUseCase.invoke().data?.points?.sortedBy { it.ord }
             Log.d("viewmodel", "$points")
             _points.emit(points)
         }
+    }
+
+    fun startTour() {
+
     }
 }

@@ -61,8 +61,8 @@ class UserRepositoryImpl @Inject constructor(
         dao.insertUser(user.toDUser())
     }
 
-    override fun getUser(id: String): User? {
-        return dao.getUser(id)?.toUser()
+    override fun getUser(): User? {
+        return dao.getUser()?.toUser()
     }
 
     override suspend fun loginUser(loginRequest: LoginRequest): Resource<AuthenticationResponse> {

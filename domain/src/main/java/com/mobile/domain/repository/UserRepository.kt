@@ -10,6 +10,7 @@ import com.mobile.domain.models.ResendOtpRequest
 import com.mobile.domain.models.ResendOtpResponse
 import com.mobile.domain.models.ResetPasswordRequest
 import com.mobile.domain.models.ResetPasswordResponse
+import com.mobile.domain.models.RouteResponse
 import com.mobile.domain.models.UpcomingEventResponse
 import com.mobile.domain.models.User
 import com.mobile.domain.models.UserRegisterBody
@@ -53,5 +54,7 @@ interface UserRepository {
     suspend fun getUpcomingEvents(): Resource<UpcomingEventResponse>
 
     suspend fun getPointOfInterestMarkers(): Resource<FetchPoiResponse>
+
+    suspend fun getDirections(): Resource<RouteResponse>
 
 }

@@ -29,8 +29,4 @@ sealed class TourUiState {
     object EndMilestoneReached : TourUiState() {
         var isButtonEnabled = true
     }
-
-    object TourCompleted : TourUiState() {
-        var isButtonEnabled = true
-    }
 }

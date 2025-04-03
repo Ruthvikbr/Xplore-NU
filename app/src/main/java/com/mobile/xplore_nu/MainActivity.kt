@@ -55,7 +55,6 @@ import com.mobile.xplore_nu.ui.screens.tour.TourPage
 import com.mobile.xplore_nu.ui.screens.tour.TourViewModel
 import com.mobile.xplore_nu.ui.theme.XploreNUTheme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.coroutineScope
 import java.nio.charset.StandardCharsets
 
 @AndroidEntryPoint
@@ -279,9 +278,14 @@ private fun NavGraphBuilder.homeNavigation(navController: NavController) {
         composable("tour") {
             val viewModel = it.sharedViewModel<TourViewModel>(navController)
             val points by viewModel.points.collectAsState()
+            val mapUiState by viewModel.uiState.collectAsState()
+            val directions by viewModel.directions.collectAsState()
             TourPage(
-                fetchPoints = viewModel::getPoints,
-                points ?: emptyList()
+                points ?: emptyList(),
+                updateUserLocation = viewModel::updateUserLocation,
+                startTour = viewModel::startTour,
+                mapUiState,
+                directions
             )
         }
         composable("chatbot") {}

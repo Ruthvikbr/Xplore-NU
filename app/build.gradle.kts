@@ -111,5 +111,9 @@ dependencies {
     debugImplementation(libs.ui.tooling) // Keep this
     debugImplementation(libs.ui.test.manifest) // Keep this
     androidTestImplementation(libs.androidx.navigation.testing)
+    androidTestImplementation("androidx.navigation:navigation-testing:2.7.7")
+
+    testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.kotlinx.coroutines.test)
 
 }

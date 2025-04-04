@@ -26,8 +26,15 @@ class EventViewModelTest {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Before
-    fun setup() {
+    fun setup() = runTest {  // Important: Use runTest here
         Dispatchers.setMain(UnconfinedTestDispatcher())
+
+        // Mock the userRepository to return a *success* resource with an *empty* list initially
+        `when`(userRepository.getUpcomingEvents()).thenReturn(
+            Resource.success(
+                UpcomingEventResponse(success = true, count = 0, events = emptyList())
+            )
+        )
         eventViewModel = EventViewModel(upcomingEventsUseCase)
     }
 

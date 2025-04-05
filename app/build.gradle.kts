@@ -91,6 +91,12 @@ dependencies {
     implementation(libs.mapbox.android) {
         exclude(group = "com.google.android.gms", module = "play-services-cronet")
     }
+    implementation("com.mapbox.navigationcore:android:3.8.1")
+    implementation("com.mapbox.navigationcore:navigation:3.8.1")
+    implementation("com.mapbox.navigationcore:ui-maps:3.8.1")
+    implementation("com.mapbox.navigationcore:voice:3.8.1")
+    implementation("com.mapbox.navigationcore:ui-components:3.8.1")
+
     implementation(libs.maps.compose)
     implementation(libs.play.services.location)
     implementation(libs.kotlin.coroutines.play)

@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.mobile.data.BuildConfig
 import com.mobile.data.local.mappers.toAuthenticationResponse
 import com.mobile.data.local.mappers.toDLoginRequest
 import com.mobile.data.local.mappers.toDRequestOtpRequest
@@ -18,6 +19,7 @@ import com.mobile.data.local.mappers.toLogoutResponse
 import com.mobile.data.local.mappers.toRequestOtpResponse
 import com.mobile.data.local.mappers.toResendOtpResponse
 import com.mobile.data.local.mappers.toResetPasswordResponse
+import com.mobile.data.local.mappers.toRouteResponse
 import com.mobile.data.local.mappers.toUpcomingEventResponse
 import com.mobile.data.local.mappers.toUser
 import com.mobile.data.local.mappers.toVerifyOtpResponse
@@ -34,6 +36,7 @@ import com.mobile.domain.models.ResendOtpRequest
 import com.mobile.domain.models.ResendOtpResponse
 import com.mobile.domain.models.ResetPasswordRequest
 import com.mobile.domain.models.ResetPasswordResponse
+import com.mobile.domain.models.RouteResponse
 import com.mobile.domain.models.UpcomingEventResponse
 import com.mobile.domain.models.User
 import com.mobile.domain.models.UserRegisterBody
@@ -46,6 +49,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import org.json.JSONObject
 import javax.inject.Inject
+
 
 class UserRepositoryImpl @Inject constructor(
     private val dao: Dao,
@@ -283,7 +287,7 @@ class UserRepositoryImpl @Inject constructor(
     override suspend fun getUpcomingEvents(): Resource<UpcomingEventResponse> {
         try {
             val response = authToken.first()?.let { userService.getUpcomingEvents(it) }
-            if (response!=null && response.isSuccessful && response.body()!=null) {
+            if (response != null && response.isSuccessful && response.body() != null) {
                 val data: UpcomingEventResponse = response.body()!!.toUpcomingEventResponse()
                 return Resource.success(data)
             } else {
@@ -297,17 +301,16 @@ class UserRepositoryImpl @Inject constructor(
                     return Resource.error("Something went wrong", null)
                 }
             }
-        }  catch (e: Exception) {
+        } catch (e: Exception) {
             return Resource.error("Something went Wrong", null)
         }
         return Resource.error("Something went Wrong", null)
     }
 
-    override suspend fun getPointOfInterestMarkers(): Resource<FetchPoiResponse>
-    {
+    override suspend fun getPointOfInterestMarkers(): Resource<FetchPoiResponse> {
         try {
             val response = authToken.first()?.let { userService.getPointOfInterestMarkers(it) }
-            if (response!=null && response.isSuccessful && response.body()!=null) {
+            if (response != null && response.isSuccessful && response.body() != null) {
                 val data: FetchPoiResponse = response.body()!!.toFetchPoiResponse()
                 return Resource.success(data)
             } else {
@@ -321,7 +324,36 @@ class UserRepositoryImpl @Inject constructor(
                     return Resource.error("Something went wrong", null)
                 }
             }
-        }  catch (e: Exception) {
+        } catch (e: Exception) {
+            return Resource.error("Something went Wrong", null)
+        }
+        return Resource.error("Something went Wrong", null)
+    }
+
+    override suspend fun getDirections(): Resource<RouteResponse> {
+        try {
+            val json = ""
+            val mapBoxUrl = BuildConfig.MAPBOX_BASE_URL
+            val mapBoxAccessToken = BuildConfig.MAPBOX_ACCESS_TOKEN
+            val response =
+                authToken.first()?.let { userService.getDirections(mapBoxUrl, mapBoxAccessToken) }
+            if (response != null && response.isSuccessful && response.body() != null) {
+                val data: RouteResponse = response.body()!!.toRouteResponse()
+
+
+                return Resource.success(data)
+            } else {
+                try {
+                    response?.errorBody()?.string()?.let { errorBody ->
+                        val jsonObject = JSONObject(errorBody)
+                        val message = jsonObject.getString("message")
+                        return Resource.error(message, null)
+                    }
+                } catch (ex: Exception) {
+                    return Resource.error("Something went wrong", null)
+                }
+            }
+        } catch (e: Exception) {
             return Resource.error("Something went Wrong", null)
         }
         return Resource.error("Something went Wrong", null)

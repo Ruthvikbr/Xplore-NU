@@ -22,7 +22,6 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.mapbox.geojson.Point
 import com.mobile.domain.models.PointOfInterest
-import com.mobile.domain.models.RouteResponse
 import com.mobile.xplore_nu.ui.components.tour.MapComposable
 import com.mobile.xplore_nu.ui.components.tour.PermissionDeniedComposable
 import com.mobile.xplore_nu.ui.uistates.TourUiState
@@ -31,10 +30,9 @@ import com.mobile.xplore_nu.ui.uistates.TourUiState
 @Composable
 fun TourPage(
     points: List<PointOfInterest>,
-    updateUserLocation: (point: Point) -> Unit,
-    startTour: () -> Unit,
+    startTour: (point:Point) -> Unit,
     mapUiState: TourUiState,
-    directions: RouteResponse?
+    onEvent: (TourUiState) -> Unit,
 ) {
 
     val permissionState = rememberMultiplePermissionsState(
@@ -67,10 +65,9 @@ fun TourPage(
                 MapComposable(
                     modifier = Modifier.fillMaxSize(),
                     points,
-                    updateUserLocation = updateUserLocation,
                     startTour,
                     mapUiState,
-                    directions
+                    onEvent,
                 )
             }
 

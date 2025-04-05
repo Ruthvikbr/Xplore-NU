@@ -50,6 +50,7 @@ import kotlinx.coroutines.flow.map
 import org.json.JSONObject
 import javax.inject.Inject
 
+
 class UserRepositoryImpl @Inject constructor(
     private val dao: Dao,
     private val userService: UserService,
@@ -286,7 +287,7 @@ class UserRepositoryImpl @Inject constructor(
     override suspend fun getUpcomingEvents(): Resource<UpcomingEventResponse> {
         try {
             val response = authToken.first()?.let { userService.getUpcomingEvents(it) }
-            if (response!=null && response.isSuccessful && response.body()!=null) {
+            if (response != null && response.isSuccessful && response.body() != null) {
                 val data: UpcomingEventResponse = response.body()!!.toUpcomingEventResponse()
                 return Resource.success(data)
             } else {
@@ -300,17 +301,16 @@ class UserRepositoryImpl @Inject constructor(
                     return Resource.error("Something went wrong", null)
                 }
             }
-        }  catch (e: Exception) {
+        } catch (e: Exception) {
             return Resource.error("Something went Wrong", null)
         }
         return Resource.error("Something went Wrong", null)
     }
 
-    override suspend fun getPointOfInterestMarkers(): Resource<FetchPoiResponse>
-    {
+    override suspend fun getPointOfInterestMarkers(): Resource<FetchPoiResponse> {
         try {
             val response = authToken.first()?.let { userService.getPointOfInterestMarkers(it) }
-            if (response!=null && response.isSuccessful && response.body()!=null) {
+            if (response != null && response.isSuccessful && response.body() != null) {
                 val data: FetchPoiResponse = response.body()!!.toFetchPoiResponse()
                 return Resource.success(data)
             } else {
@@ -324,20 +324,23 @@ class UserRepositoryImpl @Inject constructor(
                     return Resource.error("Something went wrong", null)
                 }
             }
-        }  catch (e: Exception) {
+        } catch (e: Exception) {
             return Resource.error("Something went Wrong", null)
         }
         return Resource.error("Something went Wrong", null)
     }
 
-    override suspend fun getDirections(): Resource<RouteResponse>
-    {
+    override suspend fun getDirections(): Resource<RouteResponse> {
         try {
+            val json = ""
             val mapBoxUrl = BuildConfig.MAPBOX_BASE_URL
             val mapBoxAccessToken = BuildConfig.MAPBOX_ACCESS_TOKEN
-            val response = authToken.first()?.let { userService.getDirections(mapBoxUrl, mapBoxAccessToken) }
-            if (response!=null && response.isSuccessful && response.body()!=null) {
+            val response =
+                authToken.first()?.let { userService.getDirections(mapBoxUrl, mapBoxAccessToken) }
+            if (response != null && response.isSuccessful && response.body() != null) {
                 val data: RouteResponse = response.body()!!.toRouteResponse()
+
+
                 return Resource.success(data)
             } else {
                 try {
@@ -350,7 +353,7 @@ class UserRepositoryImpl @Inject constructor(
                     return Resource.error("Something went wrong", null)
                 }
             }
-        }  catch (e: Exception) {
+        } catch (e: Exception) {
             return Resource.error("Something went Wrong", null)
         }
         return Resource.error("Something went Wrong", null)

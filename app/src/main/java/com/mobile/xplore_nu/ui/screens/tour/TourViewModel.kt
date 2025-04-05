@@ -2,10 +2,8 @@ package com.mobile.xplore_nu.ui.screens.tour
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.gson.Gson
 import com.mapbox.geojson.Point
 import com.mobile.domain.models.PointOfInterest
-import com.mobile.domain.models.RouteResponse
 import com.mobile.domain.usecases.FetchPointsOfInterestUseCase
 import com.mobile.xplore_nu.ui.uistates.TourUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,72 +19,46 @@ class TourViewModel @Inject constructor(
     private val fetchPointsOfInterestUseCase: FetchPointsOfInterestUseCase,
 ) : ViewModel() {
 
-    private val _points = MutableStateFlow<List<PointOfInterest>?>(null)
-    val points: StateFlow<List<PointOfInterest>?> = _points.asStateFlow()
+    private val _points = MutableStateFlow<List<PointOfInterest>>(emptyList())
+    val points: StateFlow<List<PointOfInterest>> = _points.asStateFlow()
 
     private val _uiState = MutableStateFlow<TourUiState>(TourUiState.StartTour)
     val uiState = _uiState.asStateFlow()
 
-    private val _directions = MutableStateFlow<RouteResponse?>(null)
-    val directions: StateFlow<RouteResponse?> = _directions
-
     init {
         viewModelScope.launch(Dispatchers.IO) {
-            val points = fetchPointsOfInterestUseCase.invoke().data?.points?.sortedBy { it.ord }
-            _points.emit(points)
+            val points = fetchPointsOfInterestUseCase.invoke().data?.points
+            points?.let {
+                _points.emit(points)
+            }
         }
     }
 
-    private val currentLocation = MutableStateFlow<Point?>(null)
+    fun startTour(point: Point) {
+        if (_uiState.value == TourUiState.StartTour && _points.value.isNotEmpty()) {
+            val tourStartingLocation = _points.value[0]
 
-    fun startTour() {
-        if (_uiState.value == TourUiState.StartTour) {
-            // Check if user location is at the start location
-            val tourStartingLocation = _points.value?.get(0)
+            val startingLat = point.coordinates()[1]
+            val startingLong = point.coordinates()[0]
 
-            val startingLat = currentLocation.value?.coordinates()?.get(1)
-            val startingLong = currentLocation.value?.coordinates()?.get(0)
-
-            if (startingLat != null && startingLong != null && tourStartingLocation != null) {
+            if (startingLat != null && startingLong != null) {
                 val isUserAtStart = isUserAtStartLocation(
                     startingLat, startingLong, tourStartingLocation.lat, tourStartingLocation.long
                 )
 
                 if (isUserAtStart) {
-                    _uiState.value = TourUiState.GettingStarted
+                    _uiState.value = TourUiState.DisplayStartTourInfo(startingLat, startingLong)
                 } else {
-                    _uiState.value = TourUiState.RedirectToStart
+                    _uiState.value = TourUiState.HeadingToStartLocation(startingLat, startingLong)
                 }
-                fetchDirections()
             }
-
         }
     }
 
-    fun fetchDirections() {
+    fun onEvent(newState: TourUiState) {
         viewModelScope.launch {
-            val routeResponse = getDirections()
-            _directions.value = routeResponse
+            _uiState.value = newState
         }
-    }
-
-    fun convertResponse(jsonResponse: String): RouteResponse? {
-        val gson = Gson()
-        return try {
-            gson.fromJson(jsonResponse, RouteResponse::class.java)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
-    }
-
-    private suspend fun getDirections(): RouteResponse? {
-        val jsonResponse = """
-        {"routes":[{"weight_name":"pedestrian","weight":125.236,"duration":125.454,"distance":176.401,"legs":[{"via_waypoints":[],"admins":[{"iso_3166_1_alpha3":"USA","iso_3166_1":"US"}],"weight":125.236,"duration":125.454,"steps":[],"distance":176.401,"summary":""}],"geometry":"oolaGxv{pLoAeELUAA\\}@NEFOC[MO"}],"waypoints":[{"distance":0.956,"name":"","location":[-71.089894,42.339924]},{"distance":6.425,"name":"","location":[-71.088142,42.340077]}],"code":"Ok","uuid":"xP3NvK6slujE3b0ODYXwzxs2aukPTPIjGifBBs73uZe_H1N8pl5WwQ=="}
-    """.trimIndent()
-
-        val routeResponse = convertResponse(jsonResponse)
-        return routeResponse
     }
 
     private fun isUserAtStartLocation(
@@ -106,11 +78,6 @@ class TourViewModel @Inject constructor(
         val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
         return earthRadius * c
     }
-
-    fun updateUserLocation(point: Point) {
-        currentLocation.value = point
-    }
-
 
 
 }

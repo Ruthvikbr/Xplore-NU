@@ -75,31 +75,43 @@ class MainActivity : ComponentActivity() {
                 val topLevelRouteNames = listOf("tour", "events", "chatbot", "account")
                 val topLevelRoutes = listOf(
                     TopLevelRoute("Home", "tour", Icons.Default.Home),
-                    TopLevelRoute("Events", "event", ImageVector.vectorResource(id = R.drawable.calendar_icon)),
-                    TopLevelRoute("Chatbot", "chatbot", ImageVector.vectorResource(id = R.drawable.chatbot_icon)),
+                    TopLevelRoute(
+                        "Events",
+                        "event",
+                        ImageVector.vectorResource(id = R.drawable.calendar_icon)
+                    ),
+                    TopLevelRoute(
+                        "Chatbot",
+                        "chatbot",
+                        ImageVector.vectorResource(id = R.drawable.chatbot_icon)
+                    ),
                     TopLevelRoute("Account", "account", Icons.Default.Person)
                 )
 
-                Scaffold (
+                Scaffold(
                     bottomBar = {
                         val navBackStackEntry by navController.currentBackStackEntryAsState()
                         val currentRoute = navBackStackEntry?.destination?.route
 
                         if (currentRoute in topLevelRouteNames) { // Show bottom bar only for these routes
-                            BottomNavigation (
+                            BottomNavigation(
                                 backgroundColor = Color.White
                             ) {
                                 topLevelRoutes.forEach { route ->
                                     BottomNavigationItem(
-                                        icon = { Icon(
-                                            route.icon,
-                                            contentDescription = route.name,
-                                            tint = if (currentRoute == route.route) Color.Red else Color.Black
-                                        ) },
-                                        label = { Text(
-                                            route.name,
-                                            color = if (currentRoute == route.route) Color.Red else Color.Black
-                                        ) },
+                                        icon = {
+                                            Icon(
+                                                route.icon,
+                                                contentDescription = route.name,
+                                                tint = if (currentRoute == route.route) Color.Red else Color.Black
+                                            )
+                                        },
+                                        label = {
+                                            Text(
+                                                route.name,
+                                                color = if (currentRoute == route.route) Color.Red else Color.Black
+                                            )
+                                        },
                                         selected = currentRoute == route.route,
                                         selectedContentColor = Color.Red,
                                         unselectedContentColor = Color.Black,
@@ -276,16 +288,15 @@ private fun NavGraphBuilder.authNavigation(navController: NavController) {
 private fun NavGraphBuilder.homeNavigation(navController: NavController) {
     navigation(startDestination = "tour", route = "home") {
         composable("tour") {
-            val viewModel = it.sharedViewModel<TourViewModel>(navController)
+            val viewModel = hiltViewModel<TourViewModel>()
             val points by viewModel.points.collectAsState()
             val mapUiState by viewModel.uiState.collectAsState()
-            val directions by viewModel.directions.collectAsState()
+
             TourPage(
-                points ?: emptyList(),
-                updateUserLocation = viewModel::updateUserLocation,
+                points,
                 startTour = viewModel::startTour,
                 mapUiState,
-                directions
+                onEvent = viewModel::onEvent,
             )
         }
         composable("chatbot") {}
@@ -294,7 +305,10 @@ private fun NavGraphBuilder.homeNavigation(navController: NavController) {
             val user by produceState<User?>(initialValue = null) {
                 value = profileViewModel.getUser()
             }
-            ProfileScreen(userName = (user?.firstName + " " + user?.lastName), userEmail = user?.email) {
+            ProfileScreen(
+                userName = (user?.firstName + " " + user?.lastName),
+                userEmail = user?.email
+            ) {
                 profileViewModel.logout()
                 navController.navigate("login") {
                     popUpTo("auth") { inclusive = true }
@@ -305,7 +319,7 @@ private fun NavGraphBuilder.homeNavigation(navController: NavController) {
 }
 
 private fun NavGraphBuilder.eventNavigation(navController: NavController) {
-    navigation(startDestination = "events", route="event") {
+    navigation(startDestination = "events", route = "event") {
         composable("events") {
             val eventViewModel: EventViewModel = hiltViewModel()
             val events by eventViewModel.events.collectAsState()
@@ -313,7 +327,8 @@ private fun NavGraphBuilder.eventNavigation(navController: NavController) {
         }
         composable("details/{eventImages}/{eventName}/{eventDate}/{eventLocation}/{eventDescription}") { navBackStackEntry ->
             val encodedEventImageURLs = navBackStackEntry.arguments?.getString("eventImages")
-            val eventImages = Uri.decode(encodedEventImageURLs).split(",").filter { it.isNotEmpty() }
+            val eventImages =
+                Uri.decode(encodedEventImageURLs).split(",").filter { it.isNotEmpty() }
             val eventName = navBackStackEntry.arguments?.getString("eventName")
             val eventDate = navBackStackEntry.arguments?.getString("eventDate")
             val eventLocation = navBackStackEntry.arguments?.getString("eventLocation")
@@ -322,7 +337,7 @@ private fun NavGraphBuilder.eventNavigation(navController: NavController) {
             EventDetailsPage(
                 eventImages = eventImages,
                 eventName = eventName,
-                eventDate = eventDate ,
+                eventDate = eventDate,
                 eventLocation = eventLocation,
                 eventDescription = eventDescription
             )

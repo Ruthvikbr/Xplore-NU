@@ -82,12 +82,47 @@ Each `issue` branch can accumulate commits to address the issue. When ready, it 
 
 It is recommended to [create periodic releases](https://docs.github.com/en/free-pro-team@latest/github/administering-a-repository/managing-releases-in-a-repository#creating-a-release) from a repository, at least at the end of each sprint but can be more frequent. These releases should be working versions of the component(s) being developed in the repository. To create such releases, a new tag representing a version number (e.g., 1.0.0) is added to the local `master` branch then pushed to the remote `master` branch. A new release can then be created in Github using this tag.
 
-### Using a CI/CD pipeline
 
-Every repository needs to have a way to build its artifacts headlessly. It is a good idea to run tests as part of such build. Instructions on how to build the components in a repository needs to be documented in the repository's README.md.
+This documentation clarifies how to **run** the scripts locally and how GitHub Actions will **automatically** run them on specific branches or pull requests.
 
-A repository can also be setup to build continuously whenever a commit is pushed to the `master` branch by setting up a CI script (e.g., [Travis CI](https://www.travis-ci.com/)) in its root folder. Such script will configure the build environment (as a virtual machine) and invoke the build script on the `master` branch. If the script fails for some reason, the committer will be notified to fix it. It is a good practice to add a build [badge](https://shields.io/category/version) to the README.md file to visibly indicate the status of the last CI build (Travis CI provides such badges). 
+---
 
-The CI script will also be run when a new pull request is created or when more commits are pushed to its linked `issue` branch. Such build assures peer reviewers that the new commits when accepted will not break the build. In fact, a successful CI build can be a prerequisute for peer reviewers to look at the changes.
+### 4. CI Pipeline Configuration Highlights
 
-When a tag is pushed to the `master` branch, the CI script will additionally deliver and/or deploy the built artifact(s). The script can also be configured to create a Github release based on the tag.
+- **Structure**:  
+  Each workflow file (`.github/workflows/*.yml`) has:
+    1. A **name** (e.g., “Unit Testing workflow”).
+    2. **Triggers** (e.g., `on: pull_request: branches: [ dev ]`).
+    3. **Jobs** that run on `ubuntu-latest` with steps:
+        - **Checkout** your repo
+        - **Set up JDK** (actions/setup-java@v4)
+        - **Create `local.properties`** from Secrets
+        - **Cache Gradle** dependencies (actions/cache@v3)
+        - **Run Gradle tasks** (`test`, `bundleRelease`, signing, deployment, etc.)
+
+- **Actions**:
+    - [actions/checkout@v4](https://github.com/actions/checkout)
+    - [actions/setup-java@v4](https://github.com/actions/setup-java)
+    - [actions/cache@v3](https://github.com/actions/cache)
+    - [r0adkll/sign-android-release@v1](https://github.com/r0adkll/sign-android-release)
+    - [r0adkll/upload-google-play@v1.1.3](https://github.com/r0adkll/upload-google-play)
+
+- **Outputs**:
+    - **Build logs** and **test results** in the GitHub Actions UI.
+    - A new **signed `.aab`** uploaded to Google Play’s internal track if on `qa`.
+
+- **Containers/Environments**:
+    - Runs in an ephemeral Ubuntu container provided by GitHub (`ubuntu-latest`).
+    - Java 17 is installed via `actions/setup-java`.
+
+## 5. Conclusion
+
+By combining these two GitHub Actions workflows, we have a streamlined CI/CD process:
+
+- **Every Pull Request to `dev`**:
+    - Runs unit tests to ensure code quality.
+    - **No deployment**; meant for code validation.
+
+- **Every Push to `qa`**:
+    - Runs the same unit tests.
+    - On success, increments the version, builds a release bundle, signs it, and uploads to the Google Play **internal testing** track for QA.

@@ -1,16 +1,70 @@
 package com.mobile.data.remote
 
-import com.mobile.domain.models.User
+import com.mobile.data.remote.models.DAuthenticationResponse
+import com.mobile.data.remote.models.DFetchPoiResponse
+import com.mobile.data.remote.models.DLoginRequest
+import com.mobile.data.remote.models.DLogoutResponse
+import com.mobile.data.remote.models.DRequestOtpRequest
+import com.mobile.data.remote.models.DRequestOtpResponse
+import com.mobile.data.remote.models.DResendOtpRequest
+import com.mobile.data.remote.models.DResendOtpResponse
+import com.mobile.data.remote.models.DResetPasswordRequest
+import com.mobile.data.remote.models.DResetPasswordResponse
+import com.mobile.data.remote.models.DRouteResponse
+import com.mobile.data.remote.models.DUpcomingEventsResponse
+import com.mobile.data.remote.models.DUserRegisterBody
+import com.mobile.data.remote.models.DUserResponse
+import com.mobile.data.remote.models.DVerifyOtpRequest
+import com.mobile.data.remote.models.DVerifyOtpResponse
+import com.mobile.data.remote.models.RefreshTokenRequest
+import com.mobile.data.remote.models.RefreshTokenResponse
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Header
 import retrofit2.http.POST
-import retrofit2.http.Path
+import retrofit2.http.Query
+import retrofit2.http.Url
 
 interface UserService {
 
-    @GET("/users/{username}")
-    suspend fun getUser(@Path("username") username: String)
+    @POST("/auth/register")
+    suspend fun registerUser(@Body requestBody: DUserRegisterBody): Response<DAuthenticationResponse>
 
-    @POST("/api/users")
-    suspend fun createUser(@Body user: User): User
+    @POST("/auth/login")
+    suspend fun loginUser(@Body dLoginRequest: DLoginRequest): Response<DAuthenticationResponse>
+
+    @GET("/auth/Users")
+    suspend fun getUsers(): Response<List<DUserResponse>>
+
+    @POST("/auth/logout")
+    suspend fun logoutUser(): Response<DLogoutResponse>
+
+    @POST("/auth/forgot_password")
+    suspend fun requestOtp(@Body dRequestOtpRequest: DRequestOtpRequest): Response<DRequestOtpResponse>
+
+    @POST("auth/verify_otp")
+    suspend fun verifyOtp(@Body dVerifyOtpRequest: DVerifyOtpRequest): Response<DVerifyOtpResponse>
+
+    @POST("auth/resend_otp")
+    suspend fun resendOtp(@Body dResendOtpRequest: DResendOtpRequest): Response<DResendOtpResponse>
+
+    @POST("auth/reset_password")
+    suspend fun resetPassword(@Body dResetPasswordRequest: DResetPasswordRequest): Response<DResetPasswordResponse>
+
+    @POST("auth/refreshToken")
+    suspend fun refreshToken(@Body refreshTokenRequest: RefreshTokenRequest): Response<RefreshTokenResponse>
+
+    @GET("event/upcoming")
+    suspend fun getUpcomingEvents(@Header("authorization") token: String): Response<DUpcomingEventsResponse>
+
+    @GET("building/pois")
+    suspend fun getPointOfInterestMarkers(@Header("authorization") token: String): Response<DFetchPoiResponse>
+
+    @GET
+    suspend fun getDirections(
+        @Url mapboxUrl: String,
+        @Query("access_token") accessToken: String
+    ): Response<DRouteResponse>
+
 }

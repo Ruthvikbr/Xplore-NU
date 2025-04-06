@@ -22,6 +22,15 @@ android {
         properties.load(project.rootProject.file("local.properties").reader())
         val baseUrl: String = properties.getProperty("BASE_URL")
         buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
+
+        val geminiApiKey: String = properties.getProperty("API_KEY")
+        buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
+
+        val mapboxAccessToken: String = properties.getProperty("MAPBOX_ACCESS_TOKEN")
+        buildConfigField("String", "MAPBOX_ACCESS_TOKEN", "\"$mapboxAccessToken\"")
+
+        val mapboxBaseUrl: String = properties.getProperty("MAPBOX_BASE_URL")
+        buildConfigField("String", "MAPBOX_BASE_URL", "\"$mapboxBaseUrl\"")
     }
 
     buildTypes {

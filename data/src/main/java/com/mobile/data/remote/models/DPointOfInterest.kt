@@ -10,6 +10,6 @@ data class DPointOfInterest(
     val description: String,
     val lat: Double,
     val long: Double,
-    val ord: Int,
+    val order: Int,
     val images: List<String>,
 )

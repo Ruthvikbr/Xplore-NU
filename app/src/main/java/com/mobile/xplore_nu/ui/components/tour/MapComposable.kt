@@ -98,6 +98,7 @@ fun MapComposable(
     startTour: (point: Point) -> Unit,
     mapUiState: TourUiState,
     onEvent: (TourUiState) -> Unit,
+    onMoreDetailsRequested:(PointOfInterest) -> Unit
 ) {
     val context = LocalContext.current
     val mapViewportState = rememberMapViewportState {
@@ -337,7 +338,10 @@ fun MapComposable(
                 onDismiss = {
                     selectedPoint = null
                 },
-                buttonLabel = "More Details"
+                buttonLabel = "More Details",
+                onButtonClicked = {
+                    onMoreDetailsRequested(selectedPoint!!)
+                }
             )
         }
 
@@ -352,7 +356,13 @@ fun MapComposable(
                         onEvent(TourUiState.DisplayBuildingInfo(points[0], points[1]))
                     }
                 },
-                buttonLabel = "Get Started"
+                buttonLabel = "Get Started",
+                onButtonClicked = {
+                    scope.launch {
+                        bottomSheetState.hide()
+                        onEvent(TourUiState.DisplayBuildingInfo(points[0], points[1]))
+                    }
+                }
             )
         } else if (mapUiState == TourUiState.TourCompleted) {
             InfoBottomSheet(
@@ -367,7 +377,13 @@ fun MapComposable(
                         )
                     }
                 },
-                buttonLabel = "Request Callback"
+                buttonLabel = "Request Callback",
+                onButtonClicked = {
+                    scope.launch {
+                        bottomSheetState.hide()
+                        onEvent(TourUiState.DisplayBuildingInfo(points[0], points[1]))
+                    }
+                }
             )
         } else if (mapUiState is TourUiState.DisplayBuildingInfo) {
             InfoBottomSheet(
@@ -409,7 +425,10 @@ fun MapComposable(
                         bottomSheetState.hide()
                     }
                 },
-                buttonLabel = "More Details"
+                buttonLabel = "More Details",
+                onButtonClicked = {
+                    onMoreDetailsRequested(mapUiState.currentBuilding)
+                }
             )
         }
 
@@ -487,6 +506,7 @@ fun InfoBottomSheet(
     bottomSheetState: SheetState,
     onDismiss: () -> Unit,
     buttonLabel: String,
+    onButtonClicked:() -> Unit
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -511,7 +531,7 @@ fun InfoBottomSheet(
             Text(text = description)
             Spacer(modifier = Modifier.height(16.dp))
             RedButton(
-                onClick = onDismiss,
+                onClick = onButtonClicked,
                 modifier = Modifier.fillMaxWidth(),
                 label = buttonLabel
             )

@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -17,11 +19,19 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0.0"
+        android.buildFeatures.buildConfig = true
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        val properties = Properties()
+        properties.load(project.rootProject.file("local.properties").reader())
+
+        val geminiApiKey: String = properties.getProperty("API_KEY")
+        buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
+
     }
 
     buildTypes {
@@ -96,6 +106,9 @@ dependencies {
     implementation("com.mapbox.navigationcore:ui-maps:3.8.1")
     implementation("com.mapbox.navigationcore:voice:3.8.1")
     implementation("com.mapbox.navigationcore:ui-components:3.8.1")
+
+    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
+
 
     implementation(libs.maps.compose)
     implementation(libs.play.services.location)

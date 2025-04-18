@@ -33,6 +33,7 @@ fun TourPage(
     startTour: (point:Point) -> Unit,
     mapUiState: TourUiState,
     onEvent: (TourUiState) -> Unit,
+    onMoreDetailsClicked:(PointOfInterest) -> Unit
 ) {
 
     val permissionState = rememberMultiplePermissionsState(
@@ -68,6 +69,7 @@ fun TourPage(
                     startTour,
                     mapUiState,
                     onEvent,
+                    onMoreDetailsClicked
                 )
             }
 

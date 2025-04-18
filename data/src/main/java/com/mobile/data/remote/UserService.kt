@@ -10,7 +10,6 @@ import com.mobile.data.remote.models.DResendOtpRequest
 import com.mobile.data.remote.models.DResendOtpResponse
 import com.mobile.data.remote.models.DResetPasswordRequest
 import com.mobile.data.remote.models.DResetPasswordResponse
-import com.mobile.data.remote.models.DRouteResponse
 import com.mobile.data.remote.models.DUpcomingEventsResponse
 import com.mobile.data.remote.models.DUserRegisterBody
 import com.mobile.data.remote.models.DUserResponse
@@ -23,8 +22,6 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
-import retrofit2.http.Query
-import retrofit2.http.Url
 
 interface UserService {
 
@@ -60,11 +57,5 @@ interface UserService {
 
     @GET("building/pois")
     suspend fun getPointOfInterestMarkers(@Header("authorization") token: String): Response<DFetchPoiResponse>
-
-    @GET
-    suspend fun getDirections(
-        @Url mapboxUrl: String,
-        @Query("access_token") accessToken: String
-    ): Response<DRouteResponse>
 
 }

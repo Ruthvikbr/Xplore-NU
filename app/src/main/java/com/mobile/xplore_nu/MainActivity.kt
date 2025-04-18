@@ -50,11 +50,13 @@ import com.mobile.xplore_nu.ui.screens.event.EventViewModel
 import com.mobile.xplore_nu.ui.screens.event.EventsPage
 import com.mobile.xplore_nu.ui.screens.profile.ProfileScreen
 import com.mobile.xplore_nu.ui.screens.profile.ProfileViewModel
+import com.mobile.xplore_nu.ui.screens.tour.BuildingDetailsPage
 import com.mobile.xplore_nu.ui.screens.tour.TopLevelRoute
 import com.mobile.xplore_nu.ui.screens.tour.TourPage
 import com.mobile.xplore_nu.ui.screens.tour.TourViewModel
 import com.mobile.xplore_nu.ui.theme.XploreNUTheme
 import dagger.hilt.android.AndroidEntryPoint
+import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
 @AndroidEntryPoint
@@ -297,7 +299,32 @@ private fun NavGraphBuilder.homeNavigation(navController: NavController) {
                 startTour = viewModel::startTour,
                 mapUiState,
                 onEvent = viewModel::onEvent,
+                onMoreDetailsClicked = { currentBuilding ->
+                    val encodedImageUrls = currentBuilding.images.joinToString(",") { url ->
+                        URLEncoder.encode(url, StandardCharsets.UTF_8.toString())
+                    }
+                    navController.navigate(
+                        "tourDetails/${encodedImageUrls}/${
+                            Uri.encode(
+                                currentBuilding.buildingName
+                            )
+                        }/${Uri.encode(currentBuilding.description)}"
+                    )
+                }
             )
+        }
+        composable("tourDetails/{buildingImages}/{buildingName}/{buildingDescription}") { navBackStackEntry ->
+            val buildingImageUrls = navBackStackEntry.arguments?.getString("buildingImages")
+            val buildingImages =
+                Uri.decode(buildingImageUrls).split(",").filter { it.isNotEmpty() }
+            val buildingName = Uri.decode(navBackStackEntry.arguments?.getString("buildingName"))
+            val buildingDescription = Uri.decode(navBackStackEntry.arguments?.getString("buildingDescription"))
+            BuildingDetailsPage(
+                buildingImages,
+                buildingName,
+                buildingDescription
+            )
+
         }
         composable("chatbot") {}
         composable("account") {

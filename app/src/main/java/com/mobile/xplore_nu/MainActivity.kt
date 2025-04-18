@@ -45,6 +45,8 @@ import com.mobile.xplore_nu.ui.screens.auth.login.LoginPage
 import com.mobile.xplore_nu.ui.screens.auth.login.LoginViewModel
 import com.mobile.xplore_nu.ui.screens.auth.register.RegisterViewModel
 import com.mobile.xplore_nu.ui.screens.auth.register.RegistrationPage
+import com.mobile.xplore_nu.ui.screens.chatbot.ChatPage
+import com.mobile.xplore_nu.ui.screens.chatbot.ChatViewModel
 import com.mobile.xplore_nu.ui.screens.event.EventDetailsPage
 import com.mobile.xplore_nu.ui.screens.event.EventViewModel
 import com.mobile.xplore_nu.ui.screens.event.EventsPage
@@ -318,7 +320,8 @@ private fun NavGraphBuilder.homeNavigation(navController: NavController) {
             val buildingImages =
                 Uri.decode(buildingImageUrls).split(",").filter { it.isNotEmpty() }
             val buildingName = Uri.decode(navBackStackEntry.arguments?.getString("buildingName"))
-            val buildingDescription = Uri.decode(navBackStackEntry.arguments?.getString("buildingDescription"))
+            val buildingDescription =
+                Uri.decode(navBackStackEntry.arguments?.getString("buildingDescription"))
             BuildingDetailsPage(
                 buildingImages,
                 buildingName,
@@ -326,7 +329,10 @@ private fun NavGraphBuilder.homeNavigation(navController: NavController) {
             )
 
         }
-        composable("chatbot") {}
+        composable("chatbot") {
+            val viewModel = hiltViewModel<ChatViewModel>()
+            ChatPage(onMessageSent = viewModel::sendMessage, viewModel.messageList, viewModel.predefinedQuestions)
+        }
         composable("account") {
             val profileViewModel: ProfileViewModel = hiltViewModel()
             val user by produceState<User?>(initialValue = null) {

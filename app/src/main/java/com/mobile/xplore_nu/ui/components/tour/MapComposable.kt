@@ -33,6 +33,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -53,6 +54,7 @@ import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import com.mapbox.maps.extension.compose.annotation.ViewAnnotation
 import com.mapbox.maps.extension.compose.style.BooleanValue
+import com.mapbox.maps.extension.compose.style.standard.LightPresetValue
 import com.mapbox.maps.extension.compose.style.standard.MapboxStandardStyle
 import com.mapbox.maps.extension.compose.style.standard.StandardStyleConfigurationState
 import com.mapbox.maps.plugin.PuckBearing
@@ -98,7 +100,7 @@ fun MapComposable(
     startTour: (point: Point) -> Unit,
     mapUiState: TourUiState,
     onEvent: (TourUiState) -> Unit,
-    onMoreDetailsRequested:(PointOfInterest) -> Unit
+    onMoreDetailsRequested: (PointOfInterest) -> Unit
 ) {
     val context = LocalContext.current
     val mapViewportState = rememberMapViewportState {
@@ -232,7 +234,10 @@ fun MapComposable(
 
     LaunchedEffect(mapUiState, arrived) {
         when (mapUiState) {
-            is TourUiState.StartTour -> {}
+            is TourUiState.StartTour -> {
+
+            }
+
             is TourUiState.HeadingToStartLocation -> {
                 if (arrived) {
                     onEvent(
@@ -244,17 +249,24 @@ fun MapComposable(
 
                 }
             }
-             is TourUiState.NavigatingToNextBuilding -> {
-               if(arrived) {
-                   if(mapUiState.nextBuilding == points.last()) {
-                       onEvent(TourUiState.DisplayBuildingInfo(mapUiState.nextBuilding, mapUiState.nextBuilding))
-                   } else {
-                       val currentBuilding = mapUiState.nextBuilding
-                       val newNextBuilding = points[points.indexOf(mapUiState.nextBuilding)+1]
-                       onEvent(TourUiState.DisplayBuildingInfo(currentBuilding!!, newNextBuilding))
-                   }
-               }
-             }
+
+            is TourUiState.NavigatingToNextBuilding -> {
+                if (arrived) {
+                    if (mapUiState.nextBuilding == points.last()) {
+                        onEvent(
+                            TourUiState.DisplayBuildingInfo(
+                                mapUiState.nextBuilding,
+                                mapUiState.nextBuilding
+                            )
+                        )
+                    } else {
+                        val currentBuilding = mapUiState.nextBuilding
+                        val newNextBuilding = points[points.indexOf(mapUiState.nextBuilding) + 1]
+                        onEvent(TourUiState.DisplayBuildingInfo(currentBuilding!!, newNextBuilding))
+                    }
+                }
+            }
+
             else -> {}
         }
     }
@@ -273,9 +285,11 @@ fun MapComposable(
                             showRoadLabels = BooleanValue(false)
                             showTransitLabels = BooleanValue(false)
                             showPointOfInterestLabels = BooleanValue(false)
+                            lightPreset = LightPresetValue.DUSK
                         }
-                    }
-                )
+                    },
+
+                    )
             },
             scaleBar = {},
             logo = {},
@@ -292,6 +306,7 @@ fun MapComposable(
                 mapView = mv
                 viewportDataSource = MapboxNavigationViewportDataSource(mv.mapboxMap)
                 navigationCamera = NavigationCamera(mv.mapboxMap, mv.camera, viewportDataSource!!)
+                mapViewportState.transitionToFollowPuckState()
 
                 locationComponentPlugin = mv.location.apply {
                     updateSettings {
@@ -305,7 +320,6 @@ fun MapComposable(
 
             LaunchedEffect(locationComponentPlugin) {
                 locationComponentPlugin?.addOnIndicatorPositionChangedListener { point ->
-                    //updateUserLocation(point)
                     currentLocation = point
                     viewportDataSource?.onLocationChanged(
                         Location.Builder().latitude(point.latitude()).longitude(point.longitude())
@@ -444,7 +458,6 @@ fun MapComposable(
                     }
 
                     TourUiState.StartTour -> {
-                        mapViewportState.transitionToFollowPuckState()
                         currentLocation?.let {
                             startTour(it)
                         }
@@ -506,7 +519,7 @@ fun InfoBottomSheet(
     bottomSheetState: SheetState,
     onDismiss: () -> Unit,
     buttonLabel: String,
-    onButtonClicked:() -> Unit
+    onButtonClicked: () -> Unit
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -549,7 +562,7 @@ fun Marker(point: PointOfInterest, onMarkerClicked: () -> Unit) {
                     onMarkerClicked()
                 }
             )) {
-        Text(point.buildingName, style = Typography.labelSmall)
+        Text(point.buildingName, style = Typography.labelSmall, color = Color.White)
         Image(
             painter = painterResource(R.drawable.red_marker),
             contentDescription = "Marker",

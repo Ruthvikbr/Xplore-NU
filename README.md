@@ -11,7 +11,10 @@
 
 Xplore NU is an Android application that enhances self-paced campus exploration with interactive tours
 
----
+## Tour experience
+<div align="center">
+  <video src="https://github.com/user-attachments/assets/99e1433d-66db-4ff3-8da2-4ad8ae36d131"></video>
+</div>
 
 ## Purpose 💬
 
@@ -52,13 +55,15 @@ Xplore NU is a self-guided tour companion app that allows users to:
 
 <table style="width:100%">
   <tr>
-    <td><img src = "https://github.com/user-attachments/assets/fa5e4026-ca62-4496-ad86-9ae52a9e1490" width=240 height=500></td>
-    <td><img src = "https://github.com/user-attachments/assets/17685971-a2e8-4c70-9849-5731e11ceeb8" width=240 height=500></td>
-    <td><img src = "https://github.com/user-attachments/assets/aa4ad6eb-6efa-4002-b139-061a8d190703" width=240 height=500></td>
+   <td><img src = "https://github.com/user-attachments/assets/5e00413d-36fa-4baf-9411-58fe0da9d039" width=240 height=500></td>
+
+   <td><img src = "https://github.com/user-attachments/assets/8c3e1bc2-995c-4849-997b-79702d30c8d0" width=240 height=500></td>
+    <td><img src = "https://github.com/user-attachments/assets/b68c47b2-1b34-4d20-99eb-2b4003eba23e" width=240 height=500></td>
   </tr>
   <tr>
     <td><img src = "https://github.com/user-attachments/assets/8cd49418-80ee-4176-9feb-d2f367f6e981" width=240 height=500></td>
-    <td><img src = "https://github.com/user-attachments/assets/481f564a-da32-4be8-bde2-1ff9a4f3f1ac" width=240 height=500></td>
+        <td><img src = "https://github.com/user-attachments/assets/481f564a-da32-4be8-bde2-1ff9a4f3f1ac" width=240 height=500></td>
+
    <td><img src = "https://github.com/user-attachments/assets/03f7e918-9ec9-406a-b59b-4f1c69d756a9" width=240 height=500></td>
   </tr>
   <tr>
